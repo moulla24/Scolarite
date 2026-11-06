@@ -1,0 +1,77 @@
+@if (pageState$ | async; as page) {
+  <app-page-header
+    title="Parents"
+    subtitle="Gérez tous les parents et leurs enfants"
+  >
+    <div actions class="page-actions">
+      <app-excel-page-actions
+        [templateDownload]="downloadExcelTemplate"
+        (exportClick)="onExport()"
+        (importFile)="onImportFile($event)"
+      />
+      <button
+        type="button"
+        class="btn"
+        [class.btn--primary]="!page.showCreateForm"
+        [class.btn--outline]="page.showCreateForm"
+        (click)="onNewParent()"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">
+          {{ page.showCreateForm ? 'close' : 'add' }}
+        </span>
+        {{ page.showCreateForm ? 'Fermer' : 'Nouveau parent' }}
+      </button>
+    </div>
+  </app-page-header>
+
+  <div class="toolbar-row">
+    <app-search-field
+      placeholder="Rechercher un parent…"
+      [value]="page.view.searchQuery"
+      (valueChange)="onSearch($event)"
+    />
+  </div>
+
+  <app-filter-card [resultCount]="page.view.resultCount" resultLabel="parents affichés">
+    <div class="filter-field">
+      <label class="filter-field__label" for="parent-level">Niveau scolaire</label>
+      <select
+        id="parent-level"
+        class="filter-field__select"
+        [ngModel]="page.view.selectedLevelId"
+        (ngModelChange)="onLevelChange($event)"
+      >
+        @for (opt of page.view.levelFilters; track opt.id) {
+          <option [value]="opt.id">{{ opt.label }}</option>
+        }
+      </select>
+    </div>
+    <div class="filter-field">
+      <label class="filter-field__label" for="parent-statut">Statut</label>
+      <select
+        id="parent-statut"
+        class="filter-field__select"
+        [ngModel]="page.view.selectedStatutId"
+        (ngModelChange)="onStatutChange($event)"
+      >
+        @for (opt of page.view.statutFilters; track opt.id) {
+          <option [value]="opt.id">{{ opt.label }}</option>
+        }
+      </select>
+    </div>
+  </app-filter-card>
+
+  @if (page.showCreateForm) {
+    <app-parent-create-panel
+      [editId]="page.editId"
+      (saved)="onParentSaved()"
+      (cancelled)="onCreateCancelled()"
+    />
+  }
+
+  <app-parents-table
+    [parents]="page.view.parents"
+    (edit)="onEditParent($event)"
+    (delete)="onDeleteParent($event, page.view.parents)"
+  />
+}

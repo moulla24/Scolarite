@@ -1,0 +1,44 @@
+<div class="data-card">
+  <div class="data-card__wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Matricule</th>
+          <th>Classe</th>
+          <th>Solde</th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (students().length === 0) {
+          <tr>
+            <td colspan="6" class="data-table__empty">Aucun élève trouvé.</td>
+          </tr>
+        } @else {
+          @for (student of students(); track student.id) {
+            <tr class="data-table__row">
+              <td>
+                <div class="cell-name">
+                  <app-user-avatar [initials]="student.initials" [name]="student.fullName" />
+                  {{ student.fullName }}
+                </div>
+              </td>
+              <td><code class="matricule">{{ student.matricule }}</code></td>
+              <td><app-class-chip [label]="student.className" /></td>
+              <td><app-balance-amount [amount]="student.balance" /></td>
+              <td><app-account-status-badge [status]="student.status" /></td>
+              <td>
+                <app-row-actions-menu
+                  (edit)="edit.emit(student.id)"
+                  (delete)="delete.emit(student.id)"
+                />
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

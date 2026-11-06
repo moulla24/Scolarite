@@ -1,0 +1,36 @@
+@use '../../styles/comptabilite';
+
+.refus-panel {
+  margin-bottom: 1.25rem;
+}
+
+.text-muted {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.tag--muted {
+  background: var(--surface-elevated);
+  color: var(--text-secondary);
+}
+
+.tag--warning {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.tag--danger {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+.data-table__actions {
+  display: flex;
+  gap: 0.35rem;
+  white-space: nowrap;
+}
+
+textarea.form-field__input {
+  resize: vertical;
+  min-height: 4rem;
+}

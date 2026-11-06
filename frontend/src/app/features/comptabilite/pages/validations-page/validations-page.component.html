@@ -1,0 +1,112 @@
+<app-page-header title="Validations parent" />
+
+@if (error(); as err) {
+  <div class="create-panel__alert" role="alert">{{ err }}</div>
+}
+
+<div class="toolbar-row">
+  <div class="filter-field">
+    <label class="filter-field__label" for="v-statut">Statut</label>
+    <select id="v-statut" class="filter-field__select" [ngModel]="statut()" (ngModelChange)="onStatutChange($event)">
+      <option value="EN_ATTENTE">En attente</option>
+      <option value="VALIDE">Validées</option>
+      <option value="REFUSE">Refusées</option>
+      <option value="">Toutes</option>
+    </select>
+  </div>
+</div>
+
+<app-filter-card [resultCount]="demandes().length" resultLabel="demandes" />
+
+@if (refuseId(); as rid) {
+  <section class="detail-panel refus-panel">
+    <h2 class="detail-panel__title">Motif du refus</h2>
+    <div class="form-field form-field--full">
+      <label class="form-field__label">Motif *</label>
+      <textarea
+        class="form-field__input"
+        rows="3"
+        [ngModel]="motifRefus()"
+        (ngModelChange)="motifRefus.set($event)"
+        placeholder="Ex. Montant incorrect, preuve manquante…"
+      ></textarea>
+    </div>
+    <div class="form-actions">
+      <button type="button" class="btn btn--ghost" (click)="cancelRefus()">Annuler</button>
+      <button type="button" class="btn btn--primary" [disabled]="processingId() === rid" (click)="confirmerRefus()">
+        {{ processingId() === rid ? 'Enregistrement…' : 'Confirmer le refus' }}
+      </button>
+    </div>
+  </section>
+}
+
+<div class="data-card">
+  <div class="data-card__wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Facture</th>
+          <th>Parent</th>
+          <th>Élève</th>
+          <th>Montant</th>
+          <th>Mode</th>
+          <th>Preuve</th>
+          <th>Statut</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (loading()) {
+          <tr><td colspan="9" class="data-table__empty">Chargement…</td></tr>
+        } @else if (demandes().length === 0) {
+          <tr><td colspan="9" class="data-table__empty">Aucune demande.</td></tr>
+        } @else {
+          @for (d of demandes(); track d.id) {
+            <tr>
+              <td>{{ d.dateCreation | date: 'dd/MM/yyyy HH:mm' }}</td>
+              <td><strong>{{ d.factureNumero }}</strong></td>
+              <td>
+                <div>{{ d.parentNom }}</div>
+                <small class="text-muted">{{ d.parentTelephone || '—' }}</small>
+              </td>
+              <td>{{ d.eleveNom }}<br /><small class="text-muted">{{ d.niveau }}</small></td>
+              <td><strong>{{ d.montant | currencyMru }}</strong></td>
+              <td>{{ d.modePaiement }}</td>
+              <td>{{ d.preuveReference || d.reference || '—' }}</td>
+              <td>
+                <span class="tag" [class.tag--muted]="d.statut === 'EN_COURS'"
+                  [class.tag--warning]="d.statut === 'EN_ATTENTE'"
+                  [class.tag--success]="d.statut === 'VALIDE'"
+                  [class.tag--danger]="d.statut === 'REFUSE'">
+                  {{ statutLabel(d.statut) }}
+                </span>
+                @if (d.motifRefus) {
+                  <small class="text-muted">{{ d.motifRefus }}</small>
+                }
+              </td>
+              <td>
+                @if (d.statut === 'EN_ATTENTE') {
+                  <div class="data-table__actions">
+                    <button type="button" class="btn btn--primary btn--sm"
+                      [disabled]="processingId() === d.id || refuseId() !== null"
+                      (click)="valider(d)">
+                      Valider
+                    </button>
+                    <button type="button" class="btn btn--ghost btn--sm"
+                      [disabled]="processingId() === d.id"
+                      (click)="openRefus(d)">
+                      Refuser
+                    </button>
+                  </div>
+                } @else if (d.numeroRecu) {
+                  <small>{{ d.numeroRecu }}</small>
+                }
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

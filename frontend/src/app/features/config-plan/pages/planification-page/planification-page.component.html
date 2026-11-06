@@ -1,0 +1,330 @@
+<app-page-header
+  title="Planification"
+  subtitle="Config & Plan — trimestres, types de contrôles par niveau et quotas"
+/>
+
+@if (errorMessage(); as err) {
+  <div class="planif-alert planif-alert--error" role="alert">{{ err }}</div>
+}
+@if (successMessage(); as ok) {
+  <div class="planif-alert planif-alert--ok" role="status">{{ ok }}</div>
+}
+
+@if (loading()) {
+  <p class="planif-loading" role="status">Chargement…</p>
+}
+
+<nav class="planif-tabs" aria-label="Sections planification">
+  <button
+    type="button"
+    class="planif-tabs__btn"
+    [class.planif-tabs__btn--active]="activeTab() === 'trimestres'"
+    (click)="setTab('trimestres')"
+  >
+    Trimestres
+  </button>
+  <button
+    type="button"
+    class="planif-tabs__btn"
+    [class.planif-tabs__btn--active]="activeTab() === 'types'"
+    (click)="setTab('types')"
+  >
+    Types de contrôles
+  </button>
+  <button
+    type="button"
+    class="planif-tabs__btn"
+    [class.planif-tabs__btn--active]="activeTab() === 'quotas'"
+    (click)="setTab('quotas')"
+  >
+    Quotas par trimestre
+  </button>
+</nav>
+
+@if (activeTab() === 'trimestres') {
+  <section class="planif-section data-card">
+    <h2>Trimestres scolaires</h2>
+
+    <form class="planif-form" (ngSubmit)="onSubmitTrimestre()">
+      <div class="form-field">
+        <label class="form-field__label" for="tr-annee">Année</label>
+        @if (anneeCourante(); as annee) {
+          <input
+            id="tr-annee"
+            class="form-field__input form-field__input--locked"
+            type="text"
+            [value]="annee.nom"
+            disabled
+            tabindex="-1"
+          />
+        }
+      </div>
+      <div class="form-field">
+        <label class="form-field__label" for="tr-num">N°</label>
+        <select id="tr-num" class="form-field__input" [(ngModel)]="trimNumero" name="trimNumero">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="form-field__label" for="tr-nom">Nom</label>
+        <input id="tr-nom" class="form-field__input" type="text" [(ngModel)]="trimNom" name="trimNom" placeholder="Trimestre 1" />
+      </div>
+      <div class="form-field">
+        <label class="form-field__label" for="tr-debut">Début</label>
+        <input id="tr-debut" class="form-field__input" type="date" [(ngModel)]="trimDebut" name="trimDebut" />
+      </div>
+      <div class="form-field">
+        <label class="form-field__label" for="tr-fin">Fin</label>
+        <input id="tr-fin" class="form-field__input" type="date" [(ngModel)]="trimFin" name="trimFin" />
+      </div>
+      <label class="form-field__label planif-check">
+        <input type="checkbox" [(ngModel)]="trimActif" name="trimActif" />
+        Actif
+      </label>
+      <div class="planif-form__actions">
+        <button type="submit" class="btn btn--primary" [disabled]="saving()">
+          {{ editingTrimestreId != null ? 'Enregistrer' : 'Ajouter' }}
+        </button>
+        @if (editingTrimestreId != null) {
+          <button type="button" class="btn btn--ghost" [disabled]="saving()" (click)="onCancelTrimestreEdit()">
+            Annuler
+          </button>
+        }
+      </div>
+    </form>
+
+    @if (trimestres().length === 0) {
+      <p class="planif-empty">Aucun trimestre configuré.</p>
+    } @else {
+      <table class="planif-table">
+        <thead>
+          <tr>
+            <th>N°</th>
+            <th>Nom</th>
+            <th>Période</th>
+            <th>Statut</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (t of trimestres(); track t.id) {
+            <tr [class.planif-row--editing]="editingTrimestreId === t.id">
+              <td>{{ t.numero }}</td>
+              <td>{{ t.nom }}</td>
+              <td>{{ t.dateDebut }} → {{ t.dateFin }}</td>
+              <td>
+                @if (t.actif) {
+                  <span class="planif-badge planif-badge--ok">Actif</span>
+                } @else {
+                  <span class="planif-badge">Inactif</span>
+                }
+              </td>
+              <td class="planif-row-actions">
+                <button type="button" class="btn btn--ghost btn--sm" (click)="onEditTrimestre(t)">
+                  Modifier
+                </button>
+                <button type="button" class="btn btn--ghost btn--sm" (click)="onDeleteTrimestre(t.id)">
+                  Supprimer
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </section>
+}
+
+@if (activeTab() === 'types') {
+  <section class="planif-section data-card">
+    <h2>Types de contrôles</h2>
+    <p class="planif-hint">
+      Chaque niveau (Primaire, Collège, Lycée…) possède son propre référentiel de types d’évaluation.
+    </p>
+
+    <form class="planif-form" (ngSubmit)="onSubmitType()">
+      <div class="form-field">
+        <label class="form-field__label" for="tc-niveau">Niveau</label>
+        <select
+          id="tc-niveau"
+          class="form-field__input"
+          [(ngModel)]="typeNiveauId"
+          name="typeNiveauId"
+          (ngModelChange)="onTypeNiveauChange()"
+          required
+        >
+          @for (n of niveaux(); track n.id) {
+            <option [value]="n.id">{{ n.nom }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="form-field__label" for="tc-code">Code</label>
+        <input id="tc-code" class="form-field__input" type="text" [(ngModel)]="typeCode" name="typeCode" placeholder="DEVOIR" />
+      </div>
+      <div class="form-field">
+        <label class="form-field__label" for="tc-lib">Libellé</label>
+        <input id="tc-lib" class="form-field__input" type="text" [(ngModel)]="typeLibelle" name="typeLibelle" placeholder="Devoir" />
+      </div>
+      <div class="form-field">
+        <label class="form-field__label" for="tc-note">Note max</label>
+        <input id="tc-note" class="form-field__input" type="number" step="0.5" [(ngModel)]="typeNoteMax" name="typeNoteMax" />
+      </div>
+      <div class="form-field">
+        <label class="form-field__label" for="tc-ordre">Ordre</label>
+        <input id="tc-ordre" class="form-field__input" type="number" [(ngModel)]="typeOrdre" name="typeOrdre" />
+      </div>
+      <label class="form-field__label planif-check">
+        <input type="checkbox" [(ngModel)]="typeActif" name="typeActif" />
+        Actif
+      </label>
+      <div class="planif-form__actions">
+        <button type="submit" class="btn btn--primary" [disabled]="saving()">
+          {{ editingTypeId != null ? 'Enregistrer' : 'Ajouter' }}
+        </button>
+        @if (editingTypeId != null) {
+          <button type="button" class="btn btn--ghost" [disabled]="saving()" (click)="onCancelTypeEdit()">
+            Annuler
+          </button>
+        }
+      </div>
+    </form>
+
+    @if (typesControles().length === 0) {
+      <p class="planif-empty">Aucun type de contrôle défini.</p>
+    } @else {
+      <table class="planif-table">
+        <thead>
+          <tr>
+            <th>Niveau</th>
+            <th>Code</th>
+            <th>Libellé</th>
+            <th>Note max</th>
+            <th>Ordre</th>
+            <th>Statut</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (t of typesControles(); track t.id) {
+            <tr [class.planif-row--editing]="editingTypeId === t.id">
+              <td>{{ t.niveauNom }}</td>
+              <td><code class="planif-code">{{ t.code }}</code></td>
+              <td>{{ t.libelle }}</td>
+              <td>{{ t.noteMax }}</td>
+              <td>{{ t.ordre }}</td>
+              <td>
+                @if (t.actif) {
+                  <span class="planif-badge planif-badge--ok">Actif</span>
+                } @else {
+                  <span class="planif-badge">Inactif</span>
+                }
+              </td>
+              <td class="planif-row-actions">
+                <button type="button" class="btn btn--ghost btn--sm" (click)="onEditType(t)">
+                  Modifier
+                </button>
+                <button type="button" class="btn btn--ghost btn--sm" (click)="onDeleteType(t.id)">
+                  Supprimer
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </section>
+}
+
+@if (activeTab() === 'quotas') {
+  <section class="planif-section data-card">
+    <h2>Quotas par trimestre</h2>
+    <p class="planif-hint">
+      Indiquez combien de contrôles de chaque type sont prévus dans un trimestre pour un niveau donné
+      (ex. 2 devoirs et 1 composition).
+    </p>
+
+    <div class="planif-form planif-form--filters">
+      <div class="form-field">
+        <label class="form-field__label" for="q-annee">Année</label>
+        @if (anneeCourante(); as annee) {
+          <input
+            id="q-annee"
+            class="form-field__input form-field__input--locked"
+            type="text"
+            [value]="annee.nom"
+            disabled
+            tabindex="-1"
+          />
+        }
+      </div>
+      <div class="form-field">
+        <label class="form-field__label" for="q-trim">Trimestre</label>
+        <select
+          id="q-trim"
+          class="form-field__input"
+          [(ngModel)]="quotaTrimestreId"
+          (ngModelChange)="onQuotaContextChange()"
+        >
+          @for (t of trimestresQuota(); track t.id) {
+            <option [value]="t.id">T{{ t.numero }} — {{ t.nom }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="form-field__label" for="q-niveau">Niveau</label>
+        <select
+          id="q-niveau"
+          class="form-field__input"
+          [(ngModel)]="quotaNiveauId"
+          (ngModelChange)="onQuotaContextChange()"
+        >
+          @for (n of niveaux(); track n.id) {
+            <option [value]="n.id">{{ n.nom }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    @if (trimestresQuota().length === 0) {
+      <p class="planif-empty">Créez d’abord les trimestres pour l’année sélectionnée.</p>
+    } @else if (quotas().length === 0) {
+      <p class="planif-empty">Aucun type de contrôle pour ce niveau. Définissez-les dans l’onglet Types.</p>
+    } @else {
+      <table class="planif-table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Libellé</th>
+            <th>Nombre prévu</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (q of quotas(); track q.typeControleId) {
+            <tr>
+              <td><code class="planif-code">{{ q.typeControleCode }}</code></td>
+              <td>{{ q.typeControleLibelle }}</td>
+              <td>
+                <input
+                  class="form-field__input planif-quota-input"
+                  type="number"
+                  min="0"
+                  step="1"
+                  [value]="q.nombrePrevu"
+                  (input)="updateQuotaNombre(q.typeControleId, $any($event.target).value)"
+                />
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      <div class="planif-actions">
+        <button type="button" class="btn btn--primary" [disabled]="saving()" (click)="onSaveQuotas()">
+          Enregistrer les quotas
+        </button>
+      </div>
+    }
+  </section>
+}

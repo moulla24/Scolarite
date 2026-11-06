@@ -1,0 +1,92 @@
+<app-page-header title="Dépenses scolaires" subtitle="Salaires, fournitures, électricité, maintenance…">
+  @if (!showForm()) {
+    <div actions class="page-actions">
+      <button type="button" class="btn btn--primary" (click)="openForm()">
+        Nouvelle dépense
+      </button>
+    </div>
+  }
+</app-page-header>
+
+@if (showForm()) {
+  <section class="detail-panel">
+    <h2 class="detail-panel__title">Enregistrer une dépense</h2>
+    <div class="detail-panel__grid">
+      <div class="form-field">
+        <label class="form-field__label">Catégorie</label>
+        <select class="form-field__input" [(ngModel)]="form.categorie">
+          @for (c of categories() | keyvalue; track c.key) {
+            <option [value]="c.key">{{ c.value }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="form-field__label">Date</label>
+        <input class="form-field__input" type="date" [(ngModel)]="form.dateDepense" />
+      </div>
+      <div class="form-field">
+        <label class="form-field__label">Montant (MRU)</label>
+        <input class="form-field__input" type="number" [(ngModel)]="form.montant" />
+      </div>
+      <div class="form-field form-field--full">
+        <label class="form-field__label">Description</label>
+        <input class="form-field__input" [(ngModel)]="form.description" />
+      </div>
+      <div class="form-field form-field--full">
+        <label class="form-field__label">Justificatif (réf.)</label>
+        <input class="form-field__input" [(ngModel)]="form.justificatif" />
+      </div>
+    </div>
+    <div class="form-actions">
+      <button type="button" class="btn btn--ghost" (click)="cancelForm()">Annuler</button>
+      <button type="button" class="btn btn--primary" [disabled]="saving()" (click)="submit()">
+        {{ saving() ? 'Enregistrement…' : 'Enregistrer' }}
+      </button>
+    </div>
+  </section>
+}
+
+<div class="toolbar-row">
+  <div class="filter-field">
+    <label class="filter-field__label">Catégorie</label>
+    <select class="filter-field__select" [ngModel]="categorie()" (ngModelChange)="categorie.set($event); onFilterChange()">
+      <option value="">Toutes</option>
+      @for (c of categories() | keyvalue; track c.key) {
+        <option [value]="c.key">{{ c.value }}</option>
+      }
+    </select>
+  </div>
+</div>
+
+<app-filter-card [resultCount]="depenses().length" resultLabel="dépenses" />
+
+<div class="data-card">
+  <div class="data-card__wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Catégorie</th>
+          <th>Description</th>
+          <th>Montant</th>
+          <th>Agent</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (depenses().length === 0) {
+          <tr><td colspan="5" class="data-table__empty">Aucune dépense.</td></tr>
+        } @else {
+          @for (d of depenses(); track d.id) {
+            <tr>
+              <td>{{ d.dateDepense | date: 'dd/MM/yyyy' }}</td>
+              <td>{{ d.categorieLibelle }}</td>
+              <td>{{ d.description }}</td>
+              <td><strong>{{ d.montant | currencyMru }}</strong></td>
+              <td>{{ d.agentNom ?? '—' }}</td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

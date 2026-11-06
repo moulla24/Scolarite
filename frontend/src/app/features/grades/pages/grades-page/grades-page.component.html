@@ -1,0 +1,86 @@
+@if (pageState$ | async; as page) {
+  <app-page-header
+    title="Notes"
+    subtitle="Saisie par trimestre et téléchargement des bulletins"
+  />
+
+  @if (successMessage(); as ok) {
+    <div class="grades-success" role="status">{{ ok }}</div>
+  }
+
+  <nav class="grades-tabs" aria-label="Sections notes">
+    <button
+      type="button"
+      class="grades-tabs__btn"
+      [class.grades-tabs__btn--active]="activeTab() === 'saisie'"
+      (click)="setTab('saisie')"
+    >
+      Saisie
+    </button>
+    <button
+      type="button"
+      class="grades-tabs__btn"
+      [class.grades-tabs__btn--active]="activeTab() === 'bulletins'"
+      (click)="setTab('bulletins')"
+    >
+      Bulletins
+    </button>
+  </nav>
+
+  <app-filter-card resultLabel="filtres actifs">
+    <div class="filter-field">
+      <label class="filter-field__label" for="gr-level">Niveau</label>
+      <select
+        id="gr-level"
+        class="filter-field__select"
+        [ngModel]="page.selectedLevelId"
+        (ngModelChange)="onLevelChange($event)"
+      >
+        @for (opt of page.levelFilters; track opt.id) {
+          <option [value]="opt.id">{{ opt.label }}</option>
+        }
+      </select>
+    </div>
+    <div class="filter-field">
+      <label class="filter-field__label" for="gr-class">Classe</label>
+      <select
+        id="gr-class"
+        class="filter-field__select"
+        [ngModel]="page.selectedClassId"
+        (ngModelChange)="onClassChange($event)"
+      >
+        @for (opt of page.classFilters; track opt.id) {
+          <option [value]="opt.id">{{ opt.label }}</option>
+        }
+      </select>
+    </div>
+    @if (activeTab() === 'saisie') {
+      <div class="filter-field">
+        <label class="filter-field__label" for="gr-subject">Matière</label>
+        <select
+          id="gr-subject"
+          class="filter-field__select"
+          [ngModel]="page.selectedSubjectId"
+          (ngModelChange)="onSubjectChange($event)"
+        >
+          @for (opt of page.subjectFilters; track opt.id) {
+            <option [value]="opt.id">{{ opt.label }}</option>
+          }
+        </select>
+      </div>
+    }
+  </app-filter-card>
+
+  @if (activeTab() === 'saisie') {
+    <app-grade-saisie-tab
+      [classeId]="page.selectedClassId"
+      [matiereId]="page.selectedSubjectId"
+      (saved)="onSaisieSaved()"
+    />
+  } @else {
+    <app-grade-bulletins-tab
+      [classeId]="page.selectedClassId"
+      [niveauId]="page.selectedLevelId"
+    />
+  }
+}

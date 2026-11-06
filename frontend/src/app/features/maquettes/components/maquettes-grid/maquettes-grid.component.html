@@ -1,0 +1,38 @@
+@if (templates().length === 0) {
+  <p class="maquettes-empty">Aucune maquette trouvée pour ces critères.</p>
+} @else {
+  <div class="maquettes-grid">
+    @for (item of templates(); track item.id) {
+      <article class="maquette-card">
+        <div class="maquette-card__top">
+          <span class="maquette-card__format" [attr.data-format]="item.format">
+            <span class="material-symbols-outlined" aria-hidden="true">{{ formatIcon(item.format) }}</span>
+            {{ item.format | uppercase }}
+          </span>
+          <app-class-chip [label]="levelLabel(item.level)" />
+        </div>
+        <h3 class="maquette-card__title">{{ item.title }}</h3>
+        <p class="maquette-card__subject">{{ item.subject }}</p>
+        <p class="maquette-card__desc">{{ item.description }}</p>
+        <div class="maquette-card__meta">
+          <span>{{ item.pageCount }} pages</span>
+          <span>Mis à jour {{ item.updatedAt }}</span>
+        </div>
+        <div class="maquette-card__actions">
+          <button type="button" class="btn btn--outline btn--sm" (click)="preview.emit(item.id)">
+            <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
+            Aperçu
+          </button>
+          <button type="button" class="btn btn--primary btn--sm" (click)="download.emit(item.id)">
+            <span class="material-symbols-outlined" aria-hidden="true">download</span>
+            Télécharger
+          </button>
+          <button type="button" class="btn btn--outline btn--sm" (click)="deleteItem.emit(item.id)">
+            <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+            Supprimer
+          </button>
+        </div>
+      </article>
+    }
+  </div>
+}

@@ -1,0 +1,90 @@
+@if (pageState$ | async; as page) {
+  <app-page-header
+    title="Affectations enseignants"
+    subtitle="Liez chaque matière à une classe et à un enseignant — requis pour la saisie des notes"
+  >
+    <div actions class="page-actions">
+      <app-excel-page-actions
+        [templateDownload]="downloadExcelTemplate"
+        (exportClick)="onExport()"
+        (importFile)="onImportFile($event)"
+      />
+      <button
+        type="button"
+        class="btn"
+        [class.btn--primary]="!page.showCreateForm"
+        [class.btn--outline]="page.showCreateForm"
+        (click)="onNew()"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">
+          {{ page.showCreateForm ? 'close' : 'add_link' }}
+        </span>
+        {{ page.showCreateForm ? 'Fermer' : 'Nouvelle affectation' }}
+      </button>
+    </div>
+  </app-page-header>
+
+  <div class="toolbar-row">
+    <app-search-field
+      placeholder="Rechercher une affectation…"
+      [value]="page.view.searchQuery"
+      (valueChange)="onSearch($event)"
+    />
+  </div>
+
+  <app-filter-card [resultCount]="page.view.resultCount" resultLabel="affectations affichées">
+    <div class="filter-field">
+      <label class="filter-field__label" for="asg-level">Niveau</label>
+      <select
+        id="asg-level"
+        class="filter-field__select"
+        [ngModel]="page.view.selectedLevelId"
+        (ngModelChange)="onLevel($event)"
+      >
+        @for (opt of page.view.levelFilters; track opt.id) {
+          <option [value]="opt.id">{{ opt.label }}</option>
+        }
+      </select>
+    </div>
+    <div class="filter-field">
+      <label class="filter-field__label" for="asg-class">Classe</label>
+      <select
+        id="asg-class"
+        class="filter-field__select"
+        [ngModel]="page.view.selectedClassId"
+        (ngModelChange)="onClass($event)"
+      >
+        @for (opt of page.view.classFilters; track opt.id) {
+          <option [value]="opt.id">{{ opt.label }}</option>
+        }
+      </select>
+    </div>
+    <div class="filter-field">
+      <label class="filter-field__label" for="asg-subject">Matière</label>
+      <select
+        id="asg-subject"
+        class="filter-field__select"
+        [ngModel]="page.view.selectedSubjectId"
+        (ngModelChange)="onSubject($event)"
+      >
+        @for (opt of page.view.subjectFilters; track opt.id) {
+          <option [value]="opt.id">{{ opt.label }}</option>
+        }
+      </select>
+    </div>
+  </app-filter-card>
+
+  @if (page.showCreateForm) {
+    <app-assignment-form-panel
+      [editId]="page.editId"
+      (saved)="onSaved()"
+      (cancelled)="onCancelled()"
+    />
+  }
+
+  <app-assignments-table
+    [assignments]="page.view.assignments"
+    (edit)="onEdit($event)"
+    (deleteItem)="onDelete($event, page.view.assignments)"
+  />
+}

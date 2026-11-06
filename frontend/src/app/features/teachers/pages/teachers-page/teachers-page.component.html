@@ -1,0 +1,177 @@
+<app-page-header
+  title="Enseignants"
+  subtitle="Gérez le corps enseignant et les affectations matière / classe"
+>
+  @if (activeTab() === 'enseignants') {
+    @if (pageState$ | async; as page) {
+      <div actions class="page-actions">
+        <app-excel-page-actions
+          (templateClick)="downloadTeachersExcelTemplate()"
+          (exportClick)="onExportTeachers()"
+          (importFile)="onImportTeachersFile($event)"
+        />
+        <button
+          type="button"
+          class="btn"
+          [class.btn--primary]="!page.showCreateForm"
+          [class.btn--outline]="page.showCreateForm"
+          (click)="onNew()"
+        >
+          <span class="material-symbols-outlined" aria-hidden="true">
+            {{ page.showCreateForm ? 'close' : 'person_add' }}
+          </span>
+          {{ page.showCreateForm ? 'Fermer' : 'Nouvel enseignant' }}
+        </button>
+      </div>
+    }
+  } @else {
+    @if (assignmentsPageState$ | async; as page) {
+      <div actions class="page-actions">
+        <app-excel-page-actions
+          (templateClick)="downloadAssignmentsExcelTemplate()"
+          (exportClick)="onExportAssignments()"
+          (importFile)="onImportAssignmentsFile($event)"
+        />
+        <button
+          type="button"
+          class="btn"
+          [class.btn--primary]="!page.showCreateForm"
+          [class.btn--outline]="page.showCreateForm"
+          (click)="onNew()"
+        >
+          <span class="material-symbols-outlined" aria-hidden="true">
+            {{ page.showCreateForm ? 'close' : 'add_link' }}
+          </span>
+          {{ page.showCreateForm ? 'Fermer' : 'Nouvelle affectation' }}
+        </button>
+      </div>
+    }
+  }
+</app-page-header>
+
+<nav class="teachers-tabs" aria-label="Sections enseignants">
+  <button
+    type="button"
+    class="teachers-tabs__btn"
+    [class.teachers-tabs__btn--active]="activeTab() === 'enseignants'"
+    (click)="setTab('enseignants')"
+  >
+    Liste des enseignants
+  </button>
+  <button
+    type="button"
+    class="teachers-tabs__btn"
+    [class.teachers-tabs__btn--active]="activeTab() === 'affectations'"
+    (click)="setTab('affectations')"
+  >
+    Affectations
+  </button>
+</nav>
+
+@if (activeTab() === 'enseignants') {
+  @if (pageState$ | async; as page) {
+    <div class="toolbar-row">
+      <app-search-field
+        placeholder="Rechercher un enseignant…"
+        [value]="page.view.searchQuery"
+        (valueChange)="onSearch($event)"
+      />
+    </div>
+
+    <app-filter-card [resultCount]="page.view.resultCount" resultLabel="enseignants affichés">
+      <div class="filter-field">
+        <label class="filter-field__label" for="t-subject">Matière</label>
+        <select
+          id="t-subject"
+          class="filter-field__select"
+          [ngModel]="page.view.selectedSubjectId"
+          (ngModelChange)="onSubject($event)"
+        >
+          @for (opt of page.view.subjectFilters; track opt.id) {
+            <option [value]="opt.id">{{ opt.label }}</option>
+          }
+        </select>
+      </div>
+    </app-filter-card>
+
+    @if (page.showCreateForm) {
+      <app-teacher-create-panel
+        [editId]="page.editId"
+        (saved)="onTeacherSaved()"
+        (cancelled)="onCreateCancelled()"
+      />
+    }
+
+    <app-teachers-table
+      [teachers]="page.view.teachers"
+      (edit)="onEditTeacher($event)"
+      (delete)="onDeleteTeacher($event, page.view.teachers)"
+    />
+  }
+} @else {
+  @if (assignmentsPageState$ | async; as page) {
+    <div class="toolbar-row">
+      <app-search-field
+        placeholder="Rechercher une affectation…"
+        [value]="page.view.searchQuery"
+        (valueChange)="onAssignmentSearch($event)"
+      />
+    </div>
+
+    <app-filter-card [resultCount]="page.view.resultCount" resultLabel="affectations affichées">
+      <div class="filter-field">
+        <label class="filter-field__label" for="asg-level">Niveau</label>
+        <select
+          id="asg-level"
+          class="filter-field__select"
+          [ngModel]="page.view.selectedLevelId"
+          (ngModelChange)="onAssignmentLevel($event)"
+        >
+          @for (opt of page.view.levelFilters; track opt.id) {
+            <option [value]="opt.id">{{ opt.label }}</option>
+          }
+        </select>
+      </div>
+      <div class="filter-field">
+        <label class="filter-field__label" for="asg-class">Classe</label>
+        <select
+          id="asg-class"
+          class="filter-field__select"
+          [ngModel]="page.view.selectedClassId"
+          (ngModelChange)="onAssignmentClass($event)"
+        >
+          @for (opt of page.view.classFilters; track opt.id) {
+            <option [value]="opt.id">{{ opt.label }}</option>
+          }
+        </select>
+      </div>
+      <div class="filter-field">
+        <label class="filter-field__label" for="asg-subject">Matière</label>
+        <select
+          id="asg-subject"
+          class="filter-field__select"
+          [ngModel]="page.view.selectedSubjectId"
+          (ngModelChange)="onAssignmentSubject($event)"
+        >
+          @for (opt of page.view.subjectFilters; track opt.id) {
+            <option [value]="opt.id">{{ opt.label }}</option>
+          }
+        </select>
+      </div>
+    </app-filter-card>
+
+    @if (page.showCreateForm) {
+      <app-assignment-form-panel
+        [editId]="page.editId"
+        (saved)="onAssignmentSaved()"
+        (cancelled)="onAssignmentCancelled()"
+      />
+    }
+
+    <app-assignments-table
+      [assignments]="page.view.assignments"
+      (edit)="onEditAssignment($event)"
+      (deleteItem)="onDeleteAssignment($event, page.view.assignments)"
+    />
+  }
+}

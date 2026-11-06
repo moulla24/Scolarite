@@ -1,0 +1,133 @@
+<app-page-header
+  title="Paramètres"
+  subtitle="Config & Plan — niveaux, années scolaires et établissements"
+>
+  <div actions class="page-actions">
+    <app-excel-page-actions
+      [templateDownload]="downloadExcelTemplate"
+      [showTemplate]="activeTab() !== 'ecoles'"
+      [showImport]="activeTab() !== 'ecoles'"
+      (exportClick)="onExport()"
+      (importFile)="onImportFile($event)"
+    />
+  </div>
+</app-page-header>
+
+@if (errorMessage(); as err) {
+  <div class="settings-alert settings-alert--error" role="alert">{{ err }}</div>
+}
+@if (successMessage(); as ok) {
+  <div class="settings-alert settings-alert--ok" role="status">{{ ok }}</div>
+}
+
+<nav class="settings-tabs" aria-label="Sections paramètres">
+  <button
+    type="button"
+    class="settings-tabs__btn"
+    [class.settings-tabs__btn--active]="activeTab() === 'niveaux'"
+    (click)="setTab('niveaux')"
+  >
+    Niveaux
+  </button>
+  <button
+    type="button"
+    class="settings-tabs__btn"
+    [class.settings-tabs__btn--active]="activeTab() === 'annees'"
+    (click)="setTab('annees')"
+  >
+    Années scolaires
+  </button>
+  <button
+    type="button"
+    class="settings-tabs__btn"
+    [class.settings-tabs__btn--active]="activeTab() === 'ecoles'"
+    (click)="setTab('ecoles')"
+  >
+    Écoles
+  </button>
+</nav>
+
+@if (activeTab() === 'niveaux') {
+  <section class="settings-section data-card">
+    <h2>Niveaux</h2>
+    <form class="settings-form" (ngSubmit)="onCreateNiveau()">
+      <div class="form-field">
+        <label class="form-field__label" for="nv-nom">Nom du niveau</label>
+        <input
+          id="nv-nom"
+          class="form-field__input"
+          type="text"
+          [(ngModel)]="niveauNom"
+          name="niveauNom"
+        />
+      </div>
+      <button type="submit" class="btn btn--primary" [disabled]="saving()">Ajouter</button>
+    </form>
+    <ul class="settings-list">
+      @for (n of niveaux(); track n.id) {
+        <li>{{ n.nom }} <span class="settings-list__meta">({{ n.ecoleNom }})</span></li>
+      }
+    </ul>
+  </section>
+}
+
+@if (activeTab() === 'annees') {
+  <section class="settings-section data-card">
+    <h2>Années scolaires</h2>
+    <form class="settings-form" (ngSubmit)="onCreateAnnee()">
+      <div class="form-field">
+        <label class="form-field__label" for="as-nom">Nom</label>
+        <input id="as-nom" class="form-field__input" type="text" [(ngModel)]="anneeNom" name="anneeNom" />
+      </div>
+      <div class="form-field">
+        <label class="form-field__label" for="as-debut">Date début</label>
+        <input id="as-debut" class="form-field__input" type="date" [(ngModel)]="anneeDebut" name="anneeDebut" />
+      </div>
+      <div class="form-field">
+        <label class="form-field__label" for="as-fin">Date fin</label>
+        <input id="as-fin" class="form-field__input" type="date" [(ngModel)]="anneeFin" name="anneeFin" />
+      </div>
+      <label class="form-field__label">
+        <input type="checkbox" [(ngModel)]="anneeActive" name="anneeActive" />
+        Année active
+      </label>
+      <button type="submit" class="btn btn--primary" [disabled]="saving()">Ajouter</button>
+    </form>
+    <ul class="settings-list">
+      @for (a of annees(); track a.id) {
+        <li>
+          {{ a.nom }} — {{ a.dateDebut }} → {{ a.dateFin }}
+          @if (a.active) {
+            <span class="settings-list__badge">Active</span>
+          }
+        </li>
+      }
+    </ul>
+  </section>
+}
+
+@if (activeTab() === 'ecoles') {
+  <section class="settings-section data-card">
+    <h2>Écoles</h2>
+    <form class="settings-form" (ngSubmit)="onCreateEcole()">
+      <div class="form-field">
+        <label class="form-field__label" for="ec-nom">Nom</label>
+        <input id="ec-nom" class="form-field__input" type="text" [(ngModel)]="ecoleNom" name="ecoleNom" />
+      </div>
+      <div class="form-field">
+        <label class="form-field__label" for="ec-code">Code</label>
+        <input id="ec-code" class="form-field__input" type="text" [(ngModel)]="ecoleCode" name="ecoleCode" />
+      </div>
+      <div class="form-field">
+        <label class="form-field__label" for="ec-adr">Adresse</label>
+        <input id="ec-adr" class="form-field__input" type="text" [(ngModel)]="ecoleAdresse" name="ecoleAdresse" />
+      </div>
+      <button type="submit" class="btn btn--primary" [disabled]="saving()">Ajouter</button>
+    </form>
+    <ul class="settings-list">
+      @for (e of ecoles(); track e.id) {
+        <li>{{ e.nom }} <code>{{ e.code }}</code></li>
+      }
+    </ul>
+  </section>
+}

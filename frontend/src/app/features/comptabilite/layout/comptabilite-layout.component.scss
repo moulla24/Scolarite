@@ -1,0 +1,71 @@
+.comptabilite-shell {
+  &__bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  &__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.8125rem;
+
+    &:hover {
+      color: var(--color-primary);
+    }
+
+    .material-symbols-outlined {
+      font-size: 1.1rem;
+    }
+  }
+
+  &__title {
+    font-weight: 600;
+    font-size: 0.9375rem;
+    color: var(--text-primary);
+  }
+
+  &__nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-bottom: 1.25rem;
+  }
+
+  &__nav-link {
+    padding: 0.4rem 0.75rem;
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.8125rem;
+    font-weight: 500;
+
+    &:hover {
+      background: var(--surface-elevated);
+      color: var(--text-primary);
+    }
+
+    &--active {
+      background: var(--color-primary-bg);
+      color: var(--color-primary);
+      font-weight: 600;
+    }
+  }
+
+  &__content {
+    min-height: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .comptabilite-shell__nav {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+  }
+}

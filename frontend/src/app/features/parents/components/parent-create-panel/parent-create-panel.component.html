@@ -1,0 +1,212 @@
+<section class="create-panel" aria-labelledby="create-parent-title">
+  <header class="create-panel__header">
+    <div class="create-panel__title-row">
+      <span class="material-symbols-outlined create-panel__icon" aria-hidden="true">group_add</span>
+      <div>
+        <h2 id="create-parent-title" class="create-panel__title">
+          {{ isEditMode() ? 'Modifier le parent' : 'Nouveau parent' }}
+        </h2>
+        <p class="create-panel__subtitle">
+          {{ isEditMode() ? 'Mettez à jour les informations et les enfants liés' : 'Renseignez le tuteur puis affectez-lui des élèves' }}
+        </p>
+      </div>
+    </div>
+    <button
+      type="button"
+      class="create-panel__close"
+      aria-label="Fermer le formulaire"
+      (click)="onCancel()"
+    >
+      <span class="material-symbols-outlined" aria-hidden="true">close</span>
+    </button>
+  </header>
+
+  @if (loading()) {
+    <p class="create-panel__subtitle">Chargement…</p>
+  }
+
+  @if (errorMessage(); as err) {
+    <div class="create-panel__alert" role="alert">{{ err }}</div>
+  }
+
+  <form class="create-panel__form" (ngSubmit)="onSubmit()">
+    <div class="create-panel__grid">
+      <div class="form-field">
+        <label class="form-field__label" for="par-nom">Nom *</label>
+        <input
+          id="par-nom"
+          class="form-field__input"
+          type="text"
+          placeholder="Ould Ahmed"
+          [ngModel]="form().nom"
+          (ngModelChange)="patchField('nom', $event)"
+          name="nom"
+          required
+        />
+      </div>
+
+      <div class="form-field">
+        <label class="form-field__label" for="par-prenom">Prénom</label>
+        <input
+          id="par-prenom"
+          class="form-field__input"
+          type="text"
+          placeholder="Mohamed"
+          [ngModel]="form().prenom"
+          (ngModelChange)="patchField('prenom', $event)"
+          name="prenom"
+        />
+      </div>
+
+      <div class="form-field">
+        <label class="form-field__label" for="par-tel">Téléphone *</label>
+        <input
+          id="par-tel"
+          class="form-field__input"
+          type="tel"
+          placeholder="+222 45 12 34 56"
+          [ngModel]="form().telephone"
+          (ngModelChange)="patchField('telephone', $event)"
+          name="telephone"
+          required
+        />
+      </div>
+
+      <div class="form-field">
+        <label class="form-field__label" for="par-email">E-mail</label>
+        <input
+          id="par-email"
+          class="form-field__input"
+          type="email"
+          placeholder="parent@email.mr"
+          [ngModel]="form().email"
+          (ngModelChange)="patchField('email', $event)"
+          name="email"
+        />
+      </div>
+
+      <div class="form-field form-field--wide">
+        <label class="form-field__label" for="par-adresse">Adresse</label>
+        <input
+          id="par-adresse"
+          class="form-field__input"
+          type="text"
+          placeholder="Nouakchott, Tevragh Zeina"
+          [ngModel]="form().adresse"
+          (ngModelChange)="patchField('adresse', $event)"
+          name="adresse"
+        />
+      </div>
+    </div>
+
+    <section class="eleve-picker" aria-labelledby="eleve-picker-title">
+      <h3 id="eleve-picker-title" class="eleve-picker__title">Affecter des élèves</h3>
+      <p class="eleve-picker__hint">
+        Choisissez un niveau et une classe, puis cliquez sur les élèves à lier. Vous pouvez changer de classe
+        sans perdre votre sélection.
+      </p>
+
+      <div class="eleve-picker__selected">
+        <span class="eleve-picker__selected-label">
+          Élèves sélectionnés ({{ selectedEleves().length }})
+        </span>
+        @if (selectedEleves().length === 0) {
+          <p class="eleve-picker__empty">Aucun élève sélectionné pour le moment.</p>
+        } @else {
+          <div class="eleve-picker__chips">
+            @for (eleve of selectedEleves(); track eleve.id) {
+              <span class="eleve-picker__chip">
+                {{ eleve.nomComplet }}
+                @if (eleve.niveau || eleve.classe) {
+                  <span class="eleve-picker__item-meta">· {{ eleve.niveau }} {{ eleve.classe }}</span>
+                }
+                <button
+                  type="button"
+                  class="eleve-picker__chip-remove"
+                  [attr.aria-label]="'Retirer ' + eleve.nomComplet"
+                  (click)="removeEleve(eleve.id)"
+                >
+                  <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                </button>
+              </span>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="eleve-picker__filters">
+        <div class="form-field">
+          <label class="form-field__label" for="par-filter-niveau">Niveau</label>
+          <select
+            id="par-filter-niveau"
+            class="form-field__input"
+            [ngModel]="filterNiveauId()"
+            (ngModelChange)="onFilterNiveauChange($event)"
+            name="filterNiveauId"
+          >
+            <option value="">Choisir un niveau…</option>
+            @for (opt of niveauOptions(); track opt.id) {
+              <option [value]="opt.id">{{ opt.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label class="form-field__label" for="par-filter-classe">Classe</label>
+          <select
+            id="par-filter-classe"
+            class="form-field__input"
+            [ngModel]="filterClasseId()"
+            (ngModelChange)="onFilterClasseChange($event)"
+            name="filterClasseId"
+            [disabled]="!filterNiveauId()"
+          >
+            <option value="">Choisir une classe…</option>
+            @for (opt of classOptions(); track opt.id) {
+              <option [value]="opt.id">{{ opt.label }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      @if (filterNiveauId() && filterClasseId()) {
+        @if (loadingEleves()) {
+          <p class="eleve-picker__status">Chargement des élèves…</p>
+        } @else if (availableEleves().length === 0) {
+          <p class="eleve-picker__status">Aucun élève dans cette classe.</p>
+        } @else {
+          <div class="eleve-picker__list" role="listbox" aria-label="Élèves disponibles" aria-multiselectable="true">
+            @for (eleve of availableEleves(); track eleve.id) {
+              <button
+                type="button"
+                class="eleve-picker__item"
+                [class.eleve-picker__item--selected]="isSelected(eleve.id)"
+                role="option"
+                [attr.aria-selected]="isSelected(eleve.id)"
+                (click)="toggleEleve(eleve)"
+              >
+                <span class="material-symbols-outlined" aria-hidden="true">
+                  {{ isSelected(eleve.id) ? 'check_box' : 'check_box_outline_blank' }}
+                </span>
+                <span class="eleve-picker__item-name">{{ eleve.nomComplet }}</span>
+                <span class="eleve-picker__item-meta">{{ eleve.matricule }}</span>
+              </button>
+            }
+          </div>
+        }
+      } @else {
+        <p class="eleve-picker__status">Sélectionnez un niveau et une classe pour afficher les élèves.</p>
+      }
+    </section>
+
+    <footer class="create-panel__actions">
+      <button type="button" class="btn btn--ghost" (click)="onCancel()" [disabled]="saving()">
+        Annuler
+      </button>
+      <button type="submit" class="btn btn--primary" [disabled]="saving() || loading()">
+        <span class="material-symbols-outlined" aria-hidden="true">save</span>
+        {{ saving() ? 'Enregistrement…' : (isEditMode() ? 'Enregistrer les modifications' : 'Enregistrer le parent') }}
+      </button>
+    </footer>
+  </form>
+</section>

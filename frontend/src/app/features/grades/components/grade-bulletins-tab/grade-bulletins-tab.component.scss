@@ -1,0 +1,39 @@
+.grades-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #475569;
+
+  &--error {
+    background: #fef2f2;
+    color: #b91c1c;
+  }
+}
+
+.bulletin-download {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.bulletin-download__select {
+  min-width: 7.5rem;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid var(--border-subtle, #cbd5e1);
+  border-radius: 6px;
+  background: #fff;
+  font-size: 0.875rem;
+}
+
+.btn--sm {
+  padding: 0.3rem 0.65rem;
+  font-size: 0.85rem;
+}
+
+.bulletins-table td {
+  vertical-align: middle;
+}

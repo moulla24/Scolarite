@@ -1,0 +1,151 @@
+<app-page-header
+  title="Journal comptable"
+  subtitle="Consulter, ajouter et modifier les écritures comptables"
+>
+  <div actions class="page-actions">
+    <button type="button" class="btn btn--primary" (click)="openCreate()">
+      <span class="material-symbols-outlined">add</span>
+      Nouvelle écriture
+    </button>
+  </div>
+</app-page-header>
+
+@if (showForm()) {
+  <section class="detail-panel ecriture-form">
+    <h2 class="detail-panel__title">{{ editId() ? 'Modifier l\'écriture' : 'Nouvelle écriture' }}</h2>
+    <div class="ecriture-form__grid">
+      <div class="filter-field">
+        <label class="filter-field__label">Date</label>
+        <input class="filter-field__input" type="date" [(ngModel)]="form.dateEcriture" />
+      </div>
+      <div class="filter-field">
+        <label class="filter-field__label">N° pièce</label>
+        <input class="filter-field__input" [(ngModel)]="form.numeroPiece" placeholder="Auto si vide" />
+      </div>
+      <div class="filter-field ecriture-form__full">
+        <label class="filter-field__label">Libellé</label>
+        <input class="filter-field__input" [(ngModel)]="form.libelle" />
+      </div>
+      <div class="filter-field">
+        <label class="filter-field__label">Compte débit</label>
+        <select class="filter-field__select" [(ngModel)]="form.compteDebit">
+          @for (c of comptes; track c.code) {
+            <option [value]="c.code">{{ c.label }}</option>
+          }
+        </select>
+      </div>
+      <div class="filter-field">
+        <label class="filter-field__label">Compte crédit</label>
+        <select class="filter-field__select" [(ngModel)]="form.compteCredit">
+          @for (c of comptes; track c.code) {
+            <option [value]="c.code">{{ c.label }}</option>
+          }
+        </select>
+      </div>
+      <div class="filter-field">
+        <label class="filter-field__label">Montant (MRU)</label>
+        <input class="filter-field__input" type="number" [(ngModel)]="form.montant" min="0" step="1" />
+      </div>
+    </div>
+    <div class="form-actions">
+      <button type="button" class="btn btn--ghost" (click)="cancelForm()">Annuler</button>
+      <button type="button" class="btn btn--primary" [disabled]="saving()" (click)="save()">
+        {{ saving() ? 'Enregistrement…' : 'Enregistrer' }}
+      </button>
+    </div>
+  </section>
+}
+
+<div class="toolbar-row journal-filters">
+  <div class="filter-field">
+    <label class="filter-field__label">Du</label>
+    <input class="filter-field__input" type="date" [ngModel]="from()" (ngModelChange)="from.set($event)" />
+  </div>
+  <div class="filter-field">
+    <label class="filter-field__label">Au</label>
+    <input class="filter-field__input" type="date" [ngModel]="to()" (ngModelChange)="to.set($event)" />
+  </div>
+  <div class="filter-field">
+    <label class="filter-field__label">Type</label>
+    <select class="filter-field__select" [ngModel]="referenceType()" (ngModelChange)="referenceType.set($event)">
+      <option value="">Tous</option>
+      <option value="PAIEMENT">Paiements scolaires</option>
+      <option value="PAIE_PERSONNEL">Salaires</option>
+      <option value="MANUEL">Manuelles</option>
+    </select>
+  </div>
+  <div class="filter-field">
+    <label class="filter-field__label">Compte</label>
+    <select class="filter-field__select" [ngModel]="compte()" (ngModelChange)="compte.set($event)">
+      <option value="">Tous</option>
+      @for (c of comptes; track c.code) {
+        <option [value]="c.code">{{ c.code }}</option>
+      }
+    </select>
+  </div>
+  <div class="filter-field filter-field--grow">
+    <label class="filter-field__label">Recherche libellé</label>
+    <input class="filter-field__input" [ngModel]="search()" (ngModelChange)="search.set($event)" />
+  </div>
+  <button type="button" class="btn btn--primary" (click)="load()">Filtrer</button>
+  <button type="button" class="btn btn--ghost" (click)="resetFilters()">Réinitialiser</button>
+</div>
+
+<app-filter-card [resultCount]="ecritures().length" resultLabel="écritures" />
+<p class="journal-total">Total filtré : <strong>{{ totalDebit() | currencyMru }}</strong></p>
+
+<div class="data-card">
+  <div class="data-card__wrap">
+    <table class="data-table journal-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>N° Pièce</th>
+          <th>Libellé</th>
+          <th>Type</th>
+          <th>Débit</th>
+          <th>Crédit</th>
+          <th>Montant</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (ecritures().length === 0) {
+          <tr><td colspan="8" class="data-table__empty">Aucune écriture pour cette période.</td></tr>
+        } @else {
+          @for (e of ecritures(); track e.id) {
+            <tr class="data-table__row">
+              <td>{{ e.dateEcriture | date: 'dd/MM/yyyy' }}</td>
+              <td><code>{{ e.numeroPiece }}</code></td>
+              <td>{{ e.libelle }}</td>
+              <td>
+                <span class="journal-type" [class.journal-type--paie]="e.referenceType === 'PAIE_PERSONNEL'" [class.journal-type--manuel]="e.referenceType === 'MANUEL'">
+                  @if (e.referenceType === 'PAIE_PERSONNEL') { Salaire }
+                  @else if (e.referenceType === 'MANUEL') { Manuel }
+                  @else { Scolarité }
+                </span>
+              </td>
+              <td>
+                <strong>{{ e.compteDebit }}</strong>
+                <small>{{ e.compteDebitLibelle }}</small>
+              </td>
+              <td>
+                <strong>{{ e.compteCredit }}</strong>
+                <small>{{ e.compteCreditLibelle }}</small>
+              </td>
+              <td><strong>{{ e.montant | currencyMru }}</strong></td>
+              <td class="data-table__actions">
+                @if (e.modifiable) {
+                  <button type="button" class="btn btn--ghost btn--sm" (click)="openEdit(e)">Modifier</button>
+                  <button type="button" class="btn btn--ghost btn--sm" (click)="deleteEcriture(e)">Supprimer</button>
+                } @else {
+                  <span class="text-muted">Auto</span>
+                }
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

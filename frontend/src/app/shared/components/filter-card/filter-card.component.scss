@@ -1,0 +1,96 @@
+.filter-card {
+  padding: 1.25rem 1.5rem;
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+  border: 1px solid rgba(112, 128, 144, 0.15);
+  box-shadow: var(--shadow-card);
+  margin-bottom: 1.5rem;
+  background: var(--surface-card);
+}
+
+.filter-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+
+  .material-symbols-outlined {
+    font-size: 1.15rem;
+    color: var(--color-accent-blue);
+  }
+}
+
+.filter-card__title {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.filter-card__body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.filter-card__count {
+  margin: 1rem 0 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+
+  strong {
+    color: var(--text-primary);
+    font-weight: 700;
+  }
+}
+
+// Contenu projeté (ng-content) : styles appliqués via ::ng-deep
+.filter-card__body {
+  ::ng-deep {
+    .filter-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      min-width: 180px;
+      flex: 1 1 180px;
+      max-width: 280px;
+    }
+
+    .filter-field__label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .filter-field__select {
+      appearance: none;
+      width: 100%;
+      padding: 0.625rem 2.25rem 0.625rem 0.75rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      background-color: var(--surface-elevated);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.65rem center;
+      background-size: 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      font-family: inherit;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+      &:hover {
+        border-color: #cbd5e1;
+      }
+
+      &:focus-visible {
+        outline: none;
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+      }
+    }
+  }
+}

@@ -1,0 +1,110 @@
+.add-panel {
+  margin-bottom: 1.25rem;
+  padding: 1.25rem;
+  border: 1px dashed var(--color-accent-blue-border, #a5d8e8);
+  border-radius: var(--radius-lg, 12px);
+  background: var(--color-accent-blue-bg, #ecf9fc);
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--text-primary);
+  }
+
+  &__hint {
+    margin: 0.35rem 0 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  &__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  &__field {
+    min-width: 8rem;
+
+    &--grow {
+      flex: 1 1 220px;
+    }
+  }
+
+  &__label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 0.35rem;
+  }
+
+  &__input {
+    width: 100%;
+    padding: 0.45rem 0.6rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    background: #fff;
+  }
+
+  &__chapters-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+
+    h4 {
+      margin: 0;
+      font-size: 0.95rem;
+    }
+  }
+
+  &__actions {
+    margin-top: 1rem;
+  }
+}
+
+.chapter-row {
+  display: grid;
+  grid-template-columns: 3rem 1fr 1.2fr auto;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  align-items: center;
+
+  &__ordre,
+  &__titre,
+  &__desc {
+    padding: 0.4rem 0.55rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    background: #fff;
+  }
+
+  &__ordre {
+    text-align: center;
+  }
+
+  &__remove {
+    border: none;
+    background: transparent;
+    color: var(--color-danger, #dc2626);
+    cursor: pointer;
+
+    &:hover {
+      color: var(--color-danger-dark, #991b1b);
+    }
+  }
+}
+
+.btn--sm {
+  padding: 0.3rem 0.65rem;
+  font-size: 0.85rem;
+}

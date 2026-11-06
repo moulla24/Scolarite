@@ -1,0 +1,45 @@
+<section class="transactions-card">
+  <header class="transactions-card__header">
+    <h2 class="transactions-card__title">Transactions récentes</h2>
+    <span class="transactions-card__count">{{ transactions().length }} entrées</span>
+  </header>
+
+  <div class="transactions-card__table-wrap">
+    <table class="transactions-table">
+      <thead>
+        <tr>
+          <th>Référence</th>
+          <th>Parent</th>
+          <th>Élèves</th>
+          <th>Niveau</th>
+          <th>Montant</th>
+          <th>Date</th>
+          <th>Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (loading()) {
+          <tr>
+            <td colspan="7" class="transactions-table__loading">Chargement…</td>
+          </tr>
+        } @else if (transactions().length === 0) {
+          <tr>
+            <td colspan="7" class="transactions-table__empty">Aucune transaction pour ce niveau.</td>
+          </tr>
+        } @else {
+          @for (tx of transactions(); track tx.reference) {
+            <tr class="transactions-table__row">
+              <td><strong>{{ tx.reference }}</strong></td>
+              <td>{{ tx.parentName }}</td>
+              <td>{{ tx.studentsCount }} élève{{ tx.studentsCount > 1 ? 's' : '' }}</td>
+              <td><span class="level-chip">{{ tx.level }}</span></td>
+              <td class="transactions-table__amount">{{ tx.amount | currencyMru }}</td>
+              <td>{{ tx.date }}</td>
+              <td><app-status-badge [status]="tx.status" /></td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

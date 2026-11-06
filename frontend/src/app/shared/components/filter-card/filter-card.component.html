@@ -1,0 +1,14 @@
+<div class="filter-card">
+  <div class="filter-card__header">
+    <span class="material-symbols-outlined" aria-hidden="true">filter_list</span>
+    <span class="filter-card__title">Filtres</span>
+  </div>
+  <div class="filter-card__body">
+    <ng-content />
+  </div>
+  @if (resultCount() !== null) {
+    <p class="filter-card__count">
+      <strong>{{ resultCount() }}</strong> {{ resultLabel() }}
+    </p>
+  }
+</div>

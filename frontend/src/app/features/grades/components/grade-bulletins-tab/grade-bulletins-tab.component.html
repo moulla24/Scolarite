@@ -1,0 +1,79 @@
+@if (!classeId() || classeId() === 'all') {
+  <div class="grades-hint">
+    <span class="material-symbols-outlined" aria-hidden="true">info</span>
+    Sélectionnez un <strong>niveau</strong> et une <strong>classe</strong> pour gérer les bulletins.
+  </div>
+} @else if (loadError()) {
+  <div class="grades-hint grades-hint--error">
+    <span class="material-symbols-outlined" aria-hidden="true">error</span>
+    Impossible de charger les bulletins.
+  </div>
+} @else if (loading()) {
+  <div class="grades-hint">Chargement des élèves…</div>
+} @else {
+  <div class="data-card">
+    <div class="data-card__wrap">
+      <table class="data-table bulletins-table">
+        <thead>
+          <tr>
+            <th>Élève</th>
+            <th>Classe</th>
+            <th>Télécharger</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (rows().length === 0) {
+            <tr>
+              <td colspan="3" class="data-table__empty">Aucun élève inscrit dans cette classe.</td>
+            </tr>
+          } @else {
+            @for (row of rows(); track row.eleveId) {
+              <tr class="data-table__row">
+                <td class="cell-name-plain">{{ row.nomComplet }}</td>
+                <td>{{ row.classe }}</td>
+                <td>
+                  <div class="bulletin-download">
+                    <select
+                      class="bulletin-download__select"
+                      [ngModel]="getSelection(row.eleveId).trimestre"
+                      (ngModelChange)="onTrimestreChange(row.eleveId, $event)"
+                      [attr.aria-label]="'Trimestre pour ' + row.nomComplet"
+                    >
+                      <option value="">Trimestre</option>
+                      <option value="1" [disabled]="!isAvailable(row, 1)">Trimestre 1</option>
+                      <option value="2" [disabled]="!isAvailable(row, 2)">Trimestre 2</option>
+                      <option value="3" [disabled]="!isAvailable(row, 3)">Trimestre 3</option>
+                    </select>
+
+                    @if (getSelection(row.eleveId).trimestre) {
+                      <select
+                        class="bulletin-download__select"
+                        [ngModel]="getSelection(row.eleveId).format"
+                        (ngModelChange)="onFormatChange(row.eleveId, $event)"
+                        [attr.aria-label]="'Format pour ' + row.nomComplet"
+                      >
+                        <option value="">Format</option>
+                        <option value="pdf">PDF</option>
+                        <option value="excel">Excel</option>
+                      </select>
+                    }
+
+                    <button
+                      type="button"
+                      class="btn btn--outline btn--sm"
+                      [disabled]="!canDownload(row) || isDownloading(row.eleveId)"
+                      (click)="download(row)"
+                    >
+                      <span class="material-symbols-outlined" aria-hidden="true">download</span>
+                      {{ isDownloading(row.eleveId) ? '…' : 'Télécharger' }}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}

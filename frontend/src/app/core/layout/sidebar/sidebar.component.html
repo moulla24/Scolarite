@@ -1,0 +1,71 @@
+<aside class="sidebar">
+  <div class="sidebar__brand">
+    <span class="sidebar__logo material-symbols-outlined" aria-hidden="true">school</span>
+    <span class="sidebar__title">{{ appName }}</span>
+  </div>
+
+  @if (user$ | async; as user) {
+    <div class="sidebar__profile">
+      <div class="sidebar__avatar" aria-hidden="true">{{ user.avatarInitials }}</div>
+      <div class="sidebar__profile-info">
+        <span class="sidebar__name">{{ user.name }}</span>
+        <span class="sidebar__role">{{ user.role }}</span>
+      </div>
+    </div>
+  }
+
+  <nav class="sidebar__nav" aria-label="Navigation principale">
+    @if (menuItems$ | async; as items) {
+      @for (item of items; track trackItem(item)) {
+        @if (item.children?.length) {
+          <div class="sidebar__folder" [class.sidebar__folder--open]="isFolderOpen(item)">
+            <button
+              type="button"
+              class="sidebar__folder-head"
+              [attr.aria-expanded]="isFolderOpen(item)"
+              (click)="toggleFolder(item)"
+            >
+              <span class="material-symbols-outlined sidebar__folder-chevron" aria-hidden="true">
+                {{ isFolderOpen(item) ? 'expand_more' : 'chevron_right' }}
+              </span>
+              <span class="material-symbols-outlined sidebar__folder-icon" aria-hidden="true">
+                {{ isFolderOpen(item) ? 'folder_open' : 'folder' }}
+              </span>
+              <span class="sidebar__folder-title">{{ item.label }}</span>
+            </button>
+            @if (isFolderOpen(item)) {
+              <div class="sidebar__folder-children">
+                @for (child of item.children; track child.route) {
+                  <a
+                    class="sidebar__link sidebar__link--child"
+                    [routerLink]="child.route!"
+                    routerLinkActive="sidebar__link--active"
+                    [routerLinkActiveOptions]="{ exact: child.exact ?? false }"
+                  >
+                    <span class="material-symbols-outlined" aria-hidden="true">{{ child.icon }}</span>
+                    <span>{{ child.label }}</span>
+                  </a>
+                }
+              </div>
+            }
+          </div>
+        } @else if (item.route) {
+          <a
+            class="sidebar__link"
+            [routerLink]="item.route"
+            routerLinkActive="sidebar__link--active"
+            [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
+          >
+            <span class="material-symbols-outlined" aria-hidden="true">{{ item.icon }}</span>
+            <span>{{ item.label }}</span>
+          </a>
+        }
+      }
+    }
+  </nav>
+
+  <button type="button" class="sidebar__logout" (click)="onLogout()">
+    <span class="material-symbols-outlined" aria-hidden="true">logout</span>
+    <span>Déconnexion</span>
+  </button>
+</aside>

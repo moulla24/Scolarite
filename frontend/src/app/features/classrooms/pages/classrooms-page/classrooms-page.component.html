@@ -1,0 +1,55 @@
+@if (pageState$ | async; as page) {
+  <app-page-header
+    title="Classes"
+    subtitle="Organisez les classes, salles, effectifs et enseignants référents"
+  >
+    <div actions class="page-actions">
+      <app-excel-page-actions
+        [templateDownload]="downloadExcelTemplate"
+        (exportClick)="onExport()"
+        (importFile)="onImportFile($event)"
+      />
+      <button
+        type="button"
+        class="btn"
+        [class.btn--primary]="!page.showCreateForm"
+        [class.btn--outline]="page.showCreateForm"
+        (click)="onNew()"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">
+          {{ page.showCreateForm ? 'close' : 'add' }}
+        </span>
+        {{ page.showCreateForm ? 'Fermer' : 'Nouvelle classe' }}
+      </button>
+    </div>
+  </app-page-header>
+
+  <div class="toolbar-row">
+    <app-search-field
+      placeholder="Rechercher une classe…"
+      [value]="page.view.searchQuery"
+      (valueChange)="onSearch($event)"
+    />
+  </div>
+
+  <app-filter-card [resultCount]="page.view.resultCount" resultLabel="classes affichées">
+    <div class="filter-field">
+      <label class="filter-field__label" for="cl-level">Niveau</label>
+      <select id="cl-level" class="filter-field__select" [ngModel]="page.view.selectedLevelId" (ngModelChange)="onLevel($event)">
+        @for (opt of page.view.levelFilters; track opt.id) {
+          <option [value]="opt.id">{{ opt.label }}</option>
+        }
+      </select>
+    </div>
+  </app-filter-card>
+
+  @if (page.showCreateForm) {
+    <app-classroom-create-panel
+      [editId]="page.editId"
+      (saved)="onClassroomSaved()"
+      (cancelled)="onCreateCancelled()"
+    />
+  }
+
+  <app-classrooms-grid [classrooms]="page.view.classrooms" (viewDetail)="onViewDetail($event)" />
+}

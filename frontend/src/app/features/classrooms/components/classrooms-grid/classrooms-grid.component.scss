@@ -1,0 +1,97 @@
+.classrooms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.25rem;
+}
+
+.class-card {
+  padding: 1.25rem;
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+.class-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.class-card__room {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+
+  .material-symbols-outlined {
+    font-size: 1rem;
+  }
+}
+
+.class-card__teacher {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+
+  .material-symbols-outlined {
+    font-size: 1.1rem;
+    color: var(--color-accent-teal-dark);
+  }
+}
+
+.class-card__occupancy {
+  margin-bottom: 1rem;
+}
+
+.class-card__bar {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--surface-elevated);
+  overflow: hidden;
+  margin-bottom: 0.35rem;
+}
+
+.class-card__fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--color-accent-blue), var(--color-accent-violet));
+  transition: width 0.3s ease;
+
+  &--full {
+    background: linear-gradient(90deg, var(--color-warning), var(--color-warning-dark));
+  }
+}
+
+.class-card__count {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.class-card__btn {
+  width: 100%;
+  justify-content: center;
+}
+
+.classrooms-empty {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-muted);
+}
+
+.btn--sm {
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8rem;
+}

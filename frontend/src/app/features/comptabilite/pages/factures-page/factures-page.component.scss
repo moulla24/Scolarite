@@ -1,0 +1,19 @@
+@use '../../styles/comptabilite';
+
+.toolbar-row .filter-field--statut {
+  flex: 0 0 140px;
+  min-width: 120px;
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.detail-panel__title {
+  margin: 0 0 0.5rem;
+}
+
+h3 {
+  margin: 1.25rem 0 0.75rem;
+  font-size: 0.95rem;
+}

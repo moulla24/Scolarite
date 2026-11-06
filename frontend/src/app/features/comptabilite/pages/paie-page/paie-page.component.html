@@ -1,0 +1,104 @@
+<app-page-header
+  title="Paie mensuelle"
+  subtitle="Versement des salaires aux enseignants et au personnel de service (agents, gardiens…)"
+>
+  <div actions class="page-actions">
+    <button
+      type="button"
+      class="btn btn--primary"
+      [disabled]="paying() || countImpayes() === 0"
+      (click)="payerTous()"
+    >
+      <span class="material-symbols-outlined">payments</span>
+      Payer tous ({{ countImpayes() }})
+    </button>
+  </div>
+</app-page-header>
+
+<div class="toolbar-row">
+  <div class="filter-field">
+    <label class="filter-field__label">Mois</label>
+    <input class="filter-field__input" type="month" [ngModel]="mois()" (ngModelChange)="mois.set($event); load()" />
+  </div>
+  <div class="filter-field">
+    <label class="filter-field__label">Mode de paiement</label>
+    <select class="filter-field__select" [ngModel]="mode()" (ngModelChange)="mode.set($event)">
+      <option value="VIREMENT">Virement</option>
+      <option value="ESPECES">Espèces</option>
+      <option value="CHEQUE">Chèque</option>
+      <option value="MOBILE">Mobile money</option>
+    </select>
+  </div>
+  <button type="button" class="btn btn--outline" (click)="load()">Actualiser</button>
+</div>
+
+<section class="comptabilite-stats paie-stats">
+  <article class="stat-card">
+    <p class="stat-card__label">Masse salariale</p>
+    <p class="stat-card__value">{{ totalMasse() | currencyMru }}</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-card__label">Déjà payé</p>
+    <p class="stat-card__value">{{ totalPaye() | currencyMru }}</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-card__label">Reste à payer</p>
+    <p class="stat-card__value">{{ totalMasse() - totalPaye() | currencyMru }}</p>
+  </article>
+</section>
+
+<app-filter-card [resultCount]="lignes().length" resultLabel="membres actifs" />
+
+@if (loading()) {
+  <p>Chargement…</p>
+} @else {
+  <div class="data-card">
+    <div class="data-card__wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Matricule</th>
+            <th>Nom</th>
+            <th>Catégorie</th>
+            <th>Salaire</th>
+            <th>Statut paie</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (lignes().length === 0) {
+            <tr><td colspan="6" class="data-table__empty">Aucun personnel actif.</td></tr>
+          } @else {
+            @for (l of lignes(); track l.personnelId) {
+              <tr class="data-table__row" [class.data-table__row--paid]="l.paye">
+                <td><code>{{ l.matricule || '—' }}</code></td>
+                <td><strong>{{ l.nomComplet }}</strong></td>
+                <td>{{ l.categorieLibelle }}</td>
+                <td>{{ l.salaireMensuel | currencyMru }}</td>
+                <td>
+                  @if (l.paye) {
+                    <span class="tag tag--success">Payé — {{ (l.montantPaye ?? l.salaireMensuel) | currencyMru }}</span>
+                  } @else {
+                    <span class="tag tag--warning">En attente</span>
+                  }
+                </td>
+                <td>
+                  @if (!l.paye) {
+                    <button
+                      type="button"
+                      class="btn btn--primary btn--sm"
+                      [disabled]="paying()"
+                      (click)="payer(l)"
+                    >
+                      Payer
+                    </button>
+                  }
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}

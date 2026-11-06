@@ -1,0 +1,159 @@
+@if (viewState$ | async; as state) {
+  <app-page-header title="Paiements" subtitle="Historique des encaissements et enregistrement de nouveaux paiements">
+    @if (!showForm()) {
+      <div actions class="page-actions">
+        <button type="button" class="btn btn--primary" (click)="openForm()">
+          <span class="material-symbols-outlined">add_card</span>
+          Enregistrer un paiement
+        </button>
+      </div>
+    }
+  </app-page-header>
+
+  @if (showForm()) {
+    <section class="detail-panel payment-form">
+      <h2 class="detail-panel__title">Nouveau paiement</h2>
+      @if (formError(); as err) {
+        <div class="create-panel__alert" role="alert">{{ err }}</div>
+      }
+      <p class="payment-form__hint">Filtrez par niveau, classe et élève pour réduire la liste des factures.</p>
+      <div class="toolbar-row payment-form__filters">
+        <app-comptabilite-eleve-filters
+          [value]="formFilters()"
+          [allowAllEleves]="true"
+          elevePlaceholder="Tous les élèves (factures)"
+          (valueChange)="onFormFiltersChange($event)"
+        />
+      </div>
+      <div class="detail-panel__grid payment-form__grid">
+        <div class="form-field">
+          <label class="form-field__label">Date *</label>
+          <input class="form-field__input" type="date" [ngModel]="paymentForm().datePaiement"
+            (ngModelChange)="patchForm('datePaiement', $event)" />
+        </div>
+        <div class="form-field">
+          <label class="form-field__label">Facture *</label>
+          <select class="form-field__input" [ngModel]="paymentForm().factureId"
+            (ngModelChange)="onFactureChange($event)">
+            <option value="">Sélectionner une facture…</option>
+            @for (f of facturesOuvertes(); track f.id) {
+              <option [value]="f.id">
+                {{ f.numero }} — {{ f.eleveNom }} (reste {{ f.resteAPayer | currencyMru }})
+              </option>
+            }
+          </select>
+        </div>
+        <div class="form-field form-field--readonly">
+          <label class="form-field__label">Parent</label>
+          <input class="form-field__input" readonly [value]="selectedFacture()?.parentNom ?? '—'" />
+        </div>
+        <div class="form-field form-field--readonly">
+          <label class="form-field__label">Élève</label>
+          <input class="form-field__input" readonly [value]="selectedFacture()?.eleveNom ?? '—'" />
+        </div>
+        <div class="form-field form-field--readonly">
+          <label class="form-field__label">Niveau</label>
+          <input class="form-field__input" readonly [value]="selectedFacture()?.niveau ?? '—'" />
+        </div>
+        <div class="form-field">
+          <label class="form-field__label">Mode *</label>
+          <select class="form-field__input" [ngModel]="paymentForm().modePaiement"
+            (ngModelChange)="patchForm('modePaiement', $event)">
+            <option value="ESPECES">Espèces</option>
+            <option value="BANQUE">Banque</option>
+            <option value="MOBILE_MONEY">Mobile Money</option>
+            <option value="CHEQUE">Chèque</option>
+          </select>
+        </div>
+        <div class="form-field form-field--readonly">
+          <label class="form-field__label">Reçu</label>
+          <input class="form-field__input" readonly value="Généré automatiquement à l'enregistrement" />
+        </div>
+        <div class="form-field form-field--readonly">
+          <label class="form-field__label">Agent</label>
+          <input class="form-field__input" readonly [value]="agentNom()" />
+        </div>
+        <div class="form-field">
+          <label class="form-field__label">Montant (MRU) *</label>
+          <input class="form-field__input" type="number" [ngModel]="paymentForm().montant"
+            (ngModelChange)="patchForm('montant', $event)" min="1" step="1" />
+        </div>
+        <div class="form-field">
+          <label class="form-field__label">Référence</label>
+          <input class="form-field__input" type="text" [ngModel]="paymentForm().reference"
+            (ngModelChange)="patchForm('reference', $event)" placeholder="PAY-123, n° chèque…" />
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn--ghost" (click)="cancelForm()">Annuler</button>
+        <button type="button" class="btn btn--primary" [disabled]="saving()" (click)="submitPayment()">
+          {{ saving() ? 'Enregistrement…' : 'Confirmer le paiement' }}
+        </button>
+      </div>
+    </section>
+  }
+
+  <div class="toolbar-row">
+    <app-comptabilite-eleve-filters
+      [value]="state.listFilters"
+      (valueChange)="onListFiltersChange($event)"
+    />
+    <div class="filter-field filter-field--mode">
+      <label class="filter-field__label" for="p-mode">Mode de paiement</label>
+      <select id="p-mode" class="filter-field__select" [ngModel]="state.mode" (ngModelChange)="onModeChange($event)">
+        <option value="all">Tous</option>
+        <option value="ESPECES">Espèces</option>
+        <option value="BANQUE">Banque</option>
+        <option value="MOBILE_MONEY">Mobile Money</option>
+        <option value="CHEQUE">Chèque</option>
+      </select>
+    </div>
+  </div>
+
+  <app-filter-card [resultCount]="state.count" resultLabel="paiements affichés" />
+
+  <div class="data-card">
+    <div class="data-card__wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Facture</th>
+            <th>Parent</th>
+            <th>Élève</th>
+            <th>Niveau</th>
+            <th>Mode</th>
+            <th>Reçu</th>
+            <th>Agent</th>
+            <th>Montant</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (state.paiements.length === 0) {
+            <tr><td colspan="10" class="data-table__empty">Aucun paiement trouvé.</td></tr>
+          } @else {
+            @for (p of state.paiements; track p.id) {
+              <tr class="data-table__row">
+                <td>{{ p.datePaiement | date: 'dd/MM/yyyy' }}</td>
+                <td><strong>{{ p.factureNumero }}</strong></td>
+                <td>{{ p.parentNom }}</td>
+                <td>{{ p.eleveNom }}</td>
+                <td>{{ p.niveau }}</td>
+                <td><span class="tag">{{ p.modePaiement }}</span></td>
+                <td>{{ p.numeroRecu ?? '—' }}</td>
+                <td>{{ p.agentNom ?? '—' }}</td>
+                <td><strong>{{ p.montant | currencyMru }}</strong></td>
+                <td>
+                  @if (p.numeroRecu) {
+                    <button type="button" class="btn btn--ghost btn--sm" (click)="downloadRecu(p.id)">PDF</button>
+                  }
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}

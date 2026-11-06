@@ -1,0 +1,31 @@
+@use '../../styles/comptabilite';
+
+.personnel-form {
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+  }
+}
+
+.tag {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-subtle);
+}
+
+.data-table__actions {
+  display: flex;
+  gap: 0.35rem;
+  white-space: nowrap;
+}

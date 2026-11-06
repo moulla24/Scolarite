@@ -1,0 +1,81 @@
+@if (viewState$ | async; as view) {
+  <app-page-header
+    title="Absences"
+    subtitle="Choisissez la classe et la date, puis saisissez les absences par plage (P1, P2, P3)"
+  />
+
+  @if (successMessage(); as ok) {
+    <div class="page-success" role="status">{{ ok }}</div>
+  }
+
+  <app-filter-card
+    [resultCount]="view.needsClassSelection ? null : studentCount(editableFeuille())"
+    resultLabel="élèves"
+  >
+    <div class="filter-field">
+      <label class="filter-field__label" for="abs-level">Niveau</label>
+      <select
+        id="abs-level"
+        class="filter-field__select"
+        [ngModel]="view.selectedLevelId"
+        (ngModelChange)="onLevelChange($event)"
+      >
+        @for (opt of view.levelFilters; track opt.id) {
+          <option [value]="opt.id">{{ opt.label }}</option>
+        }
+      </select>
+    </div>
+    <div class="filter-field">
+      <label class="filter-field__label" for="abs-class">Classe</label>
+      <select
+        id="abs-class"
+        class="filter-field__select"
+        [ngModel]="view.selectedClassId"
+        (ngModelChange)="onClassChange($event)"
+      >
+        @for (opt of view.classFilters; track opt.id) {
+          <option [value]="opt.id">{{ opt.label }}</option>
+        }
+      </select>
+    </div>
+    <div class="filter-field">
+      <label class="filter-field__label" for="abs-date">Date</label>
+      <input
+        id="abs-date"
+        type="date"
+        class="filter-field__select"
+        [ngModel]="view.selectedDate"
+        (ngModelChange)="onDateChange($event)"
+      />
+    </div>
+  </app-filter-card>
+
+  @if (view.needsClassSelection) {
+    <div class="hint-card">
+      <span class="material-symbols-outlined" aria-hidden="true">info</span>
+      Sélectionnez une classe pour afficher la feuille de présence.
+    </div>
+  } @else if (view.loadError) {
+    <div class="hint-card hint-card--error">
+      <span class="material-symbols-outlined" aria-hidden="true">error</span>
+      Impossible de charger la feuille de présence.
+    </div>
+  } @else if (editableFeuille()) {
+    <app-absences-grid
+      [feuille]="editableFeuille()!"
+      (statutChange)="onStatutChange($event)"
+    />
+
+    <div class="page-save-bar">
+      <button
+        type="button"
+        class="btn btn--primary"
+        [disabled]="saving() || !dirty()"
+        (click)="onSave()"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">save</span>
+        {{ saving() ? 'Enregistrement…' : 'Enregistrer' }}
+      </button>
+    </div>
+  }
+}

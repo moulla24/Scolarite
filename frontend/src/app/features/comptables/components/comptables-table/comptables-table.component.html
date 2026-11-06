@@ -1,0 +1,51 @@
+<div class="data-card">
+  <div class="data-card__wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Comptable</th>
+          <th>Contact</th>
+          <th>Matricule</th>
+          <th>Embauche</th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (comptables().length === 0) {
+          <tr><td colspan="6" class="data-table__empty">Aucun comptable trouvé.</td></tr>
+        } @else {
+          @for (c of comptables(); track c.id) {
+            <tr class="data-table__row">
+              <td>
+                <div class="cell-name">
+                  <app-user-avatar [initials]="c.initials" [name]="c.fullName" />
+                  {{ c.fullName }}
+                </div>
+              </td>
+              <td>
+                <div class="cell-contact">
+                  <span>{{ c.phone || '—' }}</span>
+                  <span>{{ c.email }}</span>
+                </div>
+              </td>
+              <td>{{ c.matricule || '—' }}</td>
+              <td>{{ c.dateEmbauche || '—' }}</td>
+              <td>
+                <span class="tag" [class.tag--success]="c.status === 'ACTIF'">
+                  {{ c.status === 'ACTIF' ? 'Actif' : 'Inactif' }}
+                </span>
+              </td>
+              <td>
+                <app-row-actions-menu
+                  (edit)="edit.emit(c.id)"
+                  (delete)="delete.emit(c.id)"
+                />
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

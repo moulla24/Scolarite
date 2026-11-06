@@ -1,0 +1,137 @@
+<app-page-header
+  title="Personnel de service"
+  subtitle="Enseignants, agents d'entretien, gardiens et autres — enregistrement et suivi des salaires"
+>
+  <div actions class="page-actions">
+    <button type="button" class="btn btn--primary" (click)="openCreate()">
+      <span class="material-symbols-outlined">person_add</span>
+      Nouveau membre
+    </button>
+  </div>
+</app-page-header>
+
+<div class="toolbar-row">
+  <app-search-field
+    placeholder="Rechercher par nom, matricule…"
+    [value]="search()"
+    (valueChange)="onSearch($event)"
+  />
+  <div class="filter-field">
+    <label class="filter-field__label">Catégorie</label>
+    <select class="filter-field__select" [ngModel]="categorie()" (ngModelChange)="categorie.set($event); onFilterChange()">
+      <option value="">Toutes</option>
+      @for (entry of categories() | keyvalue; track entry.key) {
+        <option [value]="entry.key">{{ entry.value }}</option>
+      }
+    </select>
+  </div>
+  <div class="filter-field">
+    <label class="filter-field__label">Statut</label>
+    <select class="filter-field__select" [ngModel]="statut()" (ngModelChange)="statut.set($event); onFilterChange()">
+      <option value="">Tous</option>
+      <option value="ACTIF">Actif</option>
+      <option value="INACTIF">Inactif</option>
+    </select>
+  </div>
+</div>
+
+<app-filter-card [resultCount]="personnel().length" resultLabel="membres du personnel" />
+
+@if (showForm()) {
+  <section class="detail-panel personnel-form">
+    <h2 class="detail-panel__title">{{ editId() ? 'Modifier' : 'Nouveau membre' }}</h2>
+    <div class="personnel-form__grid">
+      <div class="filter-field">
+        <label class="filter-field__label">Nom</label>
+        <input class="filter-field__input" [(ngModel)]="form.nom" />
+      </div>
+      <div class="filter-field">
+        <label class="filter-field__label">Prénom</label>
+        <input class="filter-field__input" [(ngModel)]="form.prenom" />
+      </div>
+      <div class="filter-field">
+        <label class="filter-field__label">Catégorie</label>
+        <select class="filter-field__select" [(ngModel)]="form.categorie">
+          @for (entry of categories() | keyvalue; track entry.key) {
+            <option [value]="entry.key">{{ entry.value }}</option>
+          }
+        </select>
+      </div>
+      <div class="filter-field">
+        <label class="filter-field__label">Matricule</label>
+        <input class="filter-field__input" [(ngModel)]="form.matricule" />
+      </div>
+      <div class="filter-field">
+        <label class="filter-field__label">Salaire mensuel (MRU)</label>
+        <input class="filter-field__input" type="number" [(ngModel)]="form.salaireMensuel" />
+      </div>
+      <div class="filter-field">
+        <label class="filter-field__label">Téléphone</label>
+        <input class="filter-field__input" [(ngModel)]="form.telephone" />
+      </div>
+      <div class="filter-field">
+        <label class="filter-field__label">E-mail</label>
+        <input class="filter-field__input" type="email" [(ngModel)]="form.email" />
+      </div>
+      <div class="filter-field">
+        <label class="filter-field__label">Date d'embauche</label>
+        <input class="filter-field__input" type="date" [(ngModel)]="form.dateEmbauche" />
+      </div>
+      <div class="filter-field">
+        <label class="filter-field__label">Statut</label>
+        <select class="filter-field__select" [(ngModel)]="form.statut">
+          <option value="ACTIF">Actif</option>
+          <option value="INACTIF">Inactif</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button type="button" class="btn btn--ghost" (click)="cancelForm()">Annuler</button>
+      <button type="button" class="btn btn--primary" [disabled]="saving()" (click)="save()">
+        {{ saving() ? 'Enregistrement…' : 'Enregistrer' }}
+      </button>
+    </div>
+  </section>
+}
+
+<div class="data-card">
+  <div class="data-card__wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Matricule</th>
+          <th>Nom complet</th>
+          <th>Catégorie</th>
+          <th>Salaire</th>
+          <th>Embauche</th>
+          <th>Statut</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (personnel().length === 0) {
+          <tr><td colspan="7" class="data-table__empty">Aucun personnel enregistré.</td></tr>
+        } @else {
+          @for (p of personnel(); track p.id) {
+            <tr class="data-table__row">
+              <td><code>{{ p.matricule || '—' }}</code></td>
+              <td><strong>{{ p.nomComplet }}</strong></td>
+              <td><span class="tag">{{ p.categorieLibelle }}</span></td>
+              <td>{{ p.salaireMensuel | currencyMru }}</td>
+              <td>{{ p.dateEmbauche ? (p.dateEmbauche | date: 'dd/MM/yyyy') : '—' }}</td>
+              <td>
+                <span class="tag" [class.tag--success]="p.statut === 'ACTIF'">{{ p.statut }}</span>
+              </td>
+              <td class="data-table__actions">
+                <button type="button" class="btn btn--ghost btn--sm" (click)="openEdit(p)">Modifier</button>
+                @if (p.categorie !== 'ENSEIGNANT') {
+                  <button type="button" class="btn btn--ghost btn--sm" (click)="delete(p)">Supprimer</button>
+                }
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

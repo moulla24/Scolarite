@@ -1,0 +1,94 @@
+<section class="create-panel" aria-labelledby="assignment-form-title">
+  <header class="create-panel__header">
+    <div class="create-panel__title-row">
+      <span class="material-symbols-outlined create-panel__icon" aria-hidden="true">link</span>
+      <div>
+        <h2 id="assignment-form-title" class="create-panel__title">
+          {{ isEditMode() ? 'Modifier l’affectation' : 'Nouvelle affectation' }}
+        </h2>
+        <p class="create-panel__subtitle">
+          Définissez qui enseigne quelle matière dans quelle classe (utilisé pour la saisie des notes)
+        </p>
+      </div>
+    </div>
+    <button type="button" class="create-panel__close" aria-label="Fermer" (click)="onCancel()">
+      <span class="material-symbols-outlined" aria-hidden="true">close</span>
+    </button>
+  </header>
+
+  @if (errorMessage(); as err) {
+    <div class="create-panel__alert" role="alert">{{ err }}</div>
+  }
+
+  @if (loading()) {
+    <p>Chargement…</p>
+  } @else {
+    <form class="create-panel__form" (ngSubmit)="onSubmit()">
+      <div class="create-panel__grid">
+        <div class="form-field">
+          <label class="form-field__label" for="asg-classe">Classe *</label>
+          <select
+            id="asg-classe"
+            class="form-field__input"
+            [ngModel]="form().classeId"
+            (ngModelChange)="patchField('classeId', $event)"
+            name="classeId"
+            required
+          >
+            <option value="">Choisir une classe…</option>
+            @for (c of classOptions(); track c.id) {
+              <option [value]="c.id">{{ c.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label class="form-field__label" for="asg-matiere">Matière *</label>
+          <select
+            id="asg-matiere"
+            class="form-field__input"
+            [ngModel]="form().matiereId"
+            (ngModelChange)="patchField('matiereId', $event)"
+            name="matiereId"
+            required
+          >
+            <option value="">Choisir une matière…</option>
+            @for (m of subjectOptions(); track m.id) {
+              <option [value]="m.id">{{ m.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label class="form-field__label" for="asg-ens">Enseignant *</label>
+          <select
+            id="asg-ens"
+            class="form-field__input"
+            [ngModel]="form().enseignantId"
+            (ngModelChange)="patchField('enseignantId', $event)"
+            name="enseignantId"
+            required
+          >
+            <option value="">Choisir un enseignant…</option>
+            @for (t of teacherOptions(); track t.id) {
+              <option [value]="t.id">{{ t.label }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div class="create-panel__hint">
+        <span class="material-symbols-outlined" aria-hidden="true">info</span>
+        Une seule matière par classe : ex. Français en 1AF ne peut avoir qu’un enseignant assigné.
+      </div>
+
+      <div class="create-panel__actions">
+        <button type="button" class="btn btn--outline" (click)="onCancel()">Annuler</button>
+        <button type="submit" class="btn btn--primary" [disabled]="saving()">
+          <span class="material-symbols-outlined" aria-hidden="true">save</span>
+          {{ saving() ? 'Enregistrement…' : isEditMode() ? 'Enregistrer' : 'Créer l’affectation' }}
+        </button>
+      </div>
+    </form>
+  }
+</section>

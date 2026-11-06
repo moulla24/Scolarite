@@ -1,0 +1,48 @@
+@if (visible() && bulletin(); as b) {
+  <div class="bulletin-dialog__backdrop" role="presentation" (click)="onBackdropClick($event)">
+    <dialog class="bulletin-dialog" open aria-labelledby="bulletin-title">
+      <header class="bulletin-dialog__header">
+        <h2 id="bulletin-title">Bulletin — {{ b.nomComplet }}</h2>
+        <button type="button" class="bulletin-dialog__close" aria-label="Fermer" (click)="onClose()">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </header>
+      <div class="bulletin-dialog__body">
+        <p><strong>Classe :</strong> {{ b.classe }}</p>
+        @if (b.lignes.length === 0) {
+          <p class="bulletin-dialog__hint">Aucune note enregistrée pour cet élève.</p>
+        } @else {
+          <table class="bulletin-dialog__table">
+            <thead>
+              <tr>
+                <th>Matière</th>
+                <th>Type</th>
+                <th>Date</th>
+                <th>/ Max</th>
+                <th>Note</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (l of b.lignes; track l.matiere + l.type + l.dateEvaluation) {
+                <tr>
+                  <td>{{ l.matiere }}</td>
+                  <td>{{ l.type }}</td>
+                  <td>{{ l.dateEvaluation }}</td>
+                  <td>{{ l.noteMax }}</td>
+                  <td><strong>{{ l.noteObtenue }}</strong></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+      <footer class="bulletin-dialog__footer">
+        <button type="button" class="btn btn--outline" (click)="exportExcel.emit()">
+          <span class="material-symbols-outlined" aria-hidden="true">download</span>
+          Exporter Excel
+        </button>
+        <button type="button" class="btn btn--primary" (click)="onClose()">Fermer</button>
+      </footer>
+    </dialog>
+  </div>
+}

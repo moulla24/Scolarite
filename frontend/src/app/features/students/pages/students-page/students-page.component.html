@@ -1,0 +1,71 @@
+@if (pageState$ | async; as page) {
+  <app-page-header
+    title="Élèves"
+    subtitle="Gérez tous vos élèves et leurs informations"
+  >
+    <div actions class="page-actions">
+      <app-excel-page-actions
+        [templateDownload]="downloadExcelTemplate"
+        (exportClick)="onExport()"
+        (importFile)="onImportFile($event)"
+      />
+      <button
+        type="button"
+        class="btn"
+        [class.btn--primary]="!page.showCreateForm"
+        [class.btn--outline]="page.showCreateForm"
+        (click)="onNewStudent()"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">
+          {{ page.showCreateForm ? 'close' : 'add' }}
+        </span>
+        {{ page.showCreateForm ? 'Fermer' : 'Nouvel élève' }}
+      </button>
+    </div>
+  </app-page-header>
+
+  <div class="toolbar-row">
+    <app-search-field
+      placeholder="Rechercher un élève…"
+      [value]="page.view.searchQuery"
+      (valueChange)="onSearch($event)"
+    />
+    <div class="toolbar-row__filters">
+      <select
+        class="toolbar-select"
+        aria-label="Niveau"
+        [ngModel]="page.view.selectedLevelId"
+        (ngModelChange)="onLevelChange($event)"
+      >
+        @for (opt of page.view.levelFilters; track opt.id) {
+          <option [value]="opt.id">{{ opt.label }}</option>
+        }
+      </select>
+      <select
+        class="toolbar-select"
+        aria-label="Classe"
+        [ngModel]="page.view.selectedClassId"
+        (ngModelChange)="onClassChange($event)"
+      >
+        @for (opt of page.view.classFilters; track opt.id) {
+          <option [value]="opt.id">{{ opt.label }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  @if (page.showCreateForm) {
+    <app-student-create-panel
+      [levelFilters]="page.view.levelFilters"
+      [editId]="page.editId"
+      (saved)="onStudentSaved()"
+      (cancelled)="onCreateCancelled()"
+    />
+  }
+
+  <app-students-table
+    [students]="page.view.students"
+    (edit)="onEditStudent($event)"
+    (delete)="onDeleteStudent($event, page.view.students)"
+  />
+}

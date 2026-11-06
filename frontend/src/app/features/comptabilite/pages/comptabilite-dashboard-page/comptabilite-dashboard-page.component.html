@@ -1,0 +1,150 @@
+<app-page-header
+  title="Tableau de bord"
+  subtitle="Vue d'ensemble de la trésorerie scolaire et des notifications"
+/>
+
+@if (loading()) {
+  <p>Chargement…</p>
+} @else {
+  @if (finance(); as f) {
+  <section class="comptabilite-stats" aria-label="Encaissements par période">
+    <article class="stat-card">
+      <div class="stat-card__icon stat-card__icon--success">
+        <span class="material-symbols-outlined">today</span>
+      </div>
+      <p class="stat-card__label">Aujourd'hui</p>
+      <p class="stat-card__value">{{ f.encaisseAujourdhui | currencyMru }}</p>
+    </article>
+    <article class="stat-card">
+      <div class="stat-card__icon stat-card__icon--primary">
+        <span class="material-symbols-outlined">date_range</span>
+      </div>
+      <p class="stat-card__label">Cette semaine</p>
+      <p class="stat-card__value">{{ f.encaisseSemaine | currencyMru }}</p>
+    </article>
+    <article class="stat-card">
+      <div class="stat-card__icon stat-card__icon--success">
+        <span class="material-symbols-outlined">payments</span>
+      </div>
+      <p class="stat-card__label">Ce mois</p>
+      <p class="stat-card__value">{{ f.encaisseMois | currencyMru }}</p>
+    </article>
+    <article class="stat-card">
+      <div class="stat-card__icon stat-card__icon--primary">
+        <span class="material-symbols-outlined">calendar_month</span>
+      </div>
+      <p class="stat-card__label">Cette année</p>
+      <p class="stat-card__value">{{ f.encaisseAnnee | currencyMru }}</p>
+    </article>
+    <article class="stat-card">
+      <div class="stat-card__icon stat-card__icon--warning">
+        <span class="material-symbols-outlined">account_balance_wallet</span>
+      </div>
+      <p class="stat-card__label">Créances</p>
+      <p class="stat-card__value">{{ f.creancesTotales | currencyMru }}</p>
+    </article>
+    <article class="stat-card">
+      <div class="stat-card__icon stat-card__icon--danger">
+        <span class="material-symbols-outlined">receipt_long</span>
+      </div>
+      <p class="stat-card__label">Factures impayées</p>
+      <p class="stat-card__value">{{ f.facturesImpayees }}</p>
+    </article>
+  </section>
+
+  <section class="charts-row">
+    <article class="chart-card">
+      <h2>Revenus mensuels</h2>
+      <div class="bar-chart">
+        @for (r of f.revenusMensuels; track r.annee + '-' + r.mois) {
+          <div class="bar-chart__item">
+            <div
+              class="bar-chart__bar"
+              [style.height.%]="(r.montant / maxRevenu()) * 100"
+              [title]="r.montant + ' MRU'"
+            ></div>
+            <span class="bar-chart__label">{{ r.mois }}/{{ r.annee }}</span>
+          </div>
+        }
+      </div>
+    </article>
+    <article class="chart-card">
+      <h2>Répartition des frais</h2>
+      <ul class="repartition-list">
+        @for (item of f.repartitionFrais; track item.typeFrais) {
+          <li>
+            <span>{{ item.libelle }}</span>
+            <strong>{{ item.montant | currencyMru }}</strong>
+          </li>
+        }
+      </ul>
+    </article>
+  </section>
+  }
+
+  @if (stats(); as s) {
+  <section class="quick-links">
+    <a routerLink="/comptabilite/frais" class="quick-links__card">
+      <span class="material-symbols-outlined">price_change</span>
+      <span>Frais scolaires</span>
+    </a>
+    <a routerLink="/comptabilite/soldes" class="quick-links__card">
+      <span class="material-symbols-outlined">account_balance</span>
+      <span>Soldes élèves</span>
+    </a>
+    <a routerLink="/comptabilite/depenses" class="quick-links__card">
+      <span class="material-symbols-outlined">shopping_cart</span>
+      <span>Dépenses</span>
+    </a>
+    <a routerLink="/comptabilite/rapports" class="quick-links__card">
+      <span class="material-symbols-outlined">summarize</span>
+      <span>Rapports</span>
+    </a>
+    <a routerLink="/comptabilite/personnel" class="quick-links__card">
+      <span class="material-symbols-outlined">groups</span>
+      <span>Personnel</span>
+    </a>
+    <a routerLink="/comptabilite/journal" class="quick-links__card">
+      <span class="material-symbols-outlined">menu_book</span>
+      <span>Journal</span>
+    </a>
+  </section>
+
+  <section class="notifications-panel">
+    <header class="notifications-panel__header">
+      <h2 class="notifications-panel__title">
+        Notifications
+        @if (s.notificationsNonLues > 0) {
+          <span class="badge-count">{{ s.notificationsNonLues }}</span>
+        }
+      </h2>
+      @if (s.notificationsNonLues > 0) {
+        <button type="button" class="btn btn--ghost btn--sm" (click)="markAllRead()">
+          Tout marquer lu
+        </button>
+      }
+    </header>
+    <div class="notifications-panel__list">
+      @if (notifications().length === 0) {
+        <p class="empty-msg">Aucune notification pour le moment.</p>
+      } @else {
+        @for (n of notifications(); track n.id) {
+          <article
+            class="notification-item"
+            [class.notification-item--unread]="!n.lu"
+            [class.notification-item--clickable]="n.type === 'PAIEMENT_A_VALIDER'"
+            (click)="onNotificationClick(n)"
+          >
+            <span class="material-symbols-outlined notification-item__icon">notifications</span>
+            <div class="notification-item__content">
+              <p class="notification-item__title">{{ n.titre }}</p>
+              <p class="notification-item__message">{{ n.message }}</p>
+            </div>
+            <time class="notification-item__date">{{ n.dateCreation | date: 'dd/MM HH:mm' }}</time>
+          </article>
+        }
+      }
+    </div>
+  </section>
+  }
+}

@@ -1,0 +1,103 @@
+<section class="create-panel" aria-labelledby="create-classroom-title">
+  <header class="create-panel__header">
+    <div class="create-panel__title-row">
+      <span class="material-symbols-outlined create-panel__icon" aria-hidden="true">add</span>
+      <div>
+        <h2 id="create-classroom-title" class="create-panel__title">
+          {{ isEditMode() ? 'Modifier la classe' : 'Nouvelle classe' }}
+        </h2>
+        <p class="create-panel__subtitle">
+          {{ isEditMode() ? 'Mettez à jour les informations de la classe' : 'Définissez le niveau, le nom, la salle et la capacité' }}
+        </p>
+      </div>
+    </div>
+    <button
+      type="button"
+      class="create-panel__close"
+      aria-label="Fermer le formulaire"
+      (click)="onCancel()"
+    >
+      <span class="material-symbols-outlined" aria-hidden="true">close</span>
+    </button>
+  </header>
+
+  @if (loading()) {
+    <p class="create-panel__subtitle">Chargement…</p>
+  }
+
+  @if (errorMessage(); as err) {
+    <div class="create-panel__alert" role="alert">{{ err }}</div>
+  }
+
+  <form class="create-panel__form" (ngSubmit)="onSubmit()">
+    <div class="create-panel__grid">
+      <div class="form-field">
+        <label class="form-field__label" for="cls-niveau">Niveau *</label>
+        <select
+          id="cls-niveau"
+          class="form-field__input"
+          [ngModel]="form().niveauId"
+          (ngModelChange)="patchField('niveauId', $event)"
+          name="niveauId"
+          required
+        >
+          <option value="">Choisir un niveau…</option>
+          @for (opt of niveauOptions(); track opt.id) {
+            <option [value]="opt.id">{{ opt.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label class="form-field__label" for="cls-nom">Nom de la classe *</label>
+        <input
+          id="cls-nom"
+          class="form-field__input"
+          type="text"
+          placeholder="6ème A"
+          [ngModel]="form().nom"
+          (ngModelChange)="patchField('nom', $event)"
+          name="nom"
+          required
+        />
+      </div>
+
+      <div class="form-field">
+        <label class="form-field__label" for="cls-salle">Salle</label>
+        <input
+          id="cls-salle"
+          class="form-field__input"
+          type="text"
+          placeholder="Salle 12"
+          [ngModel]="form().salle"
+          (ngModelChange)="patchField('salle', $event)"
+          name="salle"
+        />
+      </div>
+
+      <div class="form-field">
+        <label class="form-field__label" for="cls-cap">Capacité *</label>
+        <input
+          id="cls-cap"
+          class="form-field__input"
+          type="number"
+          min="1"
+          [ngModel]="form().capacite"
+          (ngModelChange)="patchField('capacite', $event)"
+          name="capacite"
+          required
+        />
+      </div>
+    </div>
+
+    <footer class="create-panel__actions">
+      <button type="button" class="btn btn--ghost" (click)="onCancel()" [disabled]="saving()">
+        Annuler
+      </button>
+      <button type="submit" class="btn btn--primary" [disabled]="saving() || loading()">
+        <span class="material-symbols-outlined" aria-hidden="true">save</span>
+        {{ saving() ? 'Enregistrement…' : (isEditMode() ? 'Enregistrer les modifications' : 'Enregistrer la classe') }}
+      </button>
+    </footer>
+  </form>
+</section>

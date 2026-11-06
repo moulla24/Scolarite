@@ -1,0 +1,11 @@
+<div class="search-field">
+  <span class="material-symbols-outlined search-field__icon" aria-hidden="true">search</span>
+  <input
+    type="search"
+    class="search-field__input"
+    [placeholder]="placeholder()"
+    [ngModel]="value()"
+    (ngModelChange)="onInput($event)"
+    aria-label="Recherche"
+  />
+</div>

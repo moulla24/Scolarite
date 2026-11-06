@@ -1,0 +1,118 @@
+@if (viewState$ | async; as view) {
+  <app-page-header
+    title="Maquettes pédagogiques"
+    subtitle="Progression par classe : matières, volumes horaires et chapitres"
+  >
+    <div actions class="page-actions">
+      @if (!view.needsClassSelection && view.grille) {
+        <app-excel-page-actions
+          (templateClick)="downloadExcelTemplate()"
+          (exportClick)="onExport(view.selectedClassId)"
+          (importFile)="onImportFile(view.selectedClassId, $event)"
+        />
+        @if (importing()) {
+          <span class="maquettes-importing">Import en cours…</span>
+        }
+      }
+    </div>
+  </app-page-header>
+
+  @if (successMessage(); as ok) {
+    <div class="page-success" role="status">{{ ok }}</div>
+  }
+  @if (importError(); as err) {
+    <div class="add-matiere-error" role="alert">{{ err }}</div>
+  }
+
+  <app-filter-card [resultCount]="view.resultCount" resultLabel="matières">
+    <div class="filter-field">
+      <label class="filter-field__label" for="mq-level">Niveau</label>
+      <select
+        id="mq-level"
+        class="filter-field__select"
+        [ngModel]="view.selectedLevelId"
+        (ngModelChange)="onLevelChange($event)"
+      >
+        @for (opt of view.levelFilters; track opt.id) {
+          <option [value]="opt.id">{{ opt.label }}</option>
+        }
+      </select>
+    </div>
+    <div class="filter-field">
+      <label class="filter-field__label" for="mq-class">Classe</label>
+      <select
+        id="mq-class"
+        class="filter-field__select"
+        [ngModel]="view.selectedClassId"
+        (ngModelChange)="onClassChange($event)"
+      >
+        @for (opt of view.classFilters; track opt.id) {
+          <option [value]="opt.id">{{ opt.label }}</option>
+        }
+      </select>
+    </div>
+    <div class="filter-field">
+      <label class="filter-field__label" for="mq-subject">Matière</label>
+      <select
+        id="mq-subject"
+        class="filter-field__select"
+        [ngModel]="view.selectedSubjectId"
+        (ngModelChange)="onSubjectChange($event, view.allMatieres)"
+      >
+        <option value="all">Toutes</option>
+        @for (opt of view.subjectFilters; track opt.id) {
+          <option [value]="opt.id">{{ opt.label }}</option>
+        }
+      </select>
+    </div>
+  </app-filter-card>
+
+  @if (view.needsClassSelection) {
+    <div class="hint-card">
+      <span class="material-symbols-outlined" aria-hidden="true">info</span>
+      Sélectionnez un niveau et une classe pour afficher la maquette.
+    </div>
+  } @else if (view.loadError) {
+    <div class="hint-card hint-card--error">
+      <span class="material-symbols-outlined" aria-hidden="true">error</span>
+      Impossible de charger la maquette.
+    </div>
+  } @else if (view.grille) {
+    <div class="maquettes-toolbar">
+      @if (!showAddPanel()) {
+        <button type="button" class="btn btn--outline" (click)="openAddPanel()">
+          <span class="material-symbols-outlined" aria-hidden="true">add</span>
+          Ajouter une matière
+        </button>
+      }
+    </div>
+
+    @if (showAddPanel()) {
+      @if (addError(); as err) {
+        <div class="add-matiere-error" role="alert">{{ err }}</div>
+      }
+
+      <app-maquette-add-matiere-panel
+        [classeId]="view.selectedClassId"
+        (added)="onMatiereAdded()"
+        (failed)="onMatiereAddFailed($event)"
+        (closed)="closeAddPanel()"
+      />
+    }
+
+    <app-maquette-matieres-grid
+      [matieres]="view.grille!.matieres"
+      [selectedId]="selectedMatiereId()"
+      (selectMatiere)="onSelectMatiere($event, view.allMatieres)"
+      (removeMatiere)="onRemoveMatiere($event)"
+    />
+
+    @if (selectedMatiereId(); as matiereId) {
+      <app-maquette-matiere-detail
+        [maquetteMatiereId]="matiereId"
+        (saved)="onDetailSaved()"
+        (closed)="onCloseDetail()"
+      />
+    }
+  }
+}

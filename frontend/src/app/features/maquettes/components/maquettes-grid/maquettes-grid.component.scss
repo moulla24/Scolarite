@@ -1,0 +1,106 @@
+.maquettes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.25rem;
+}
+
+.maquette-card {
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem;
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-primary-subtle);
+  }
+}
+
+.maquette-card__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.maquette-card__format {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+
+  .material-symbols-outlined {
+    font-size: 1.1rem;
+  }
+
+  &[data-format='pdf'] {
+    background: var(--color-accent-rose-bg);
+    color: var(--color-accent-rose-dark);
+  }
+
+  &[data-format='docx'] {
+    background: var(--color-accent-blue-bg);
+    color: var(--color-accent-blue-dark);
+  }
+
+  &[data-format='pptx'] {
+    background: var(--color-accent-amber-bg);
+    color: var(--color-accent-amber-dark);
+  }
+}
+
+.maquette-card__title {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.35;
+}
+
+.maquette-card__subject {
+  margin: 0 0 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-accent-violet-dark);
+}
+
+.maquette-card__desc {
+  margin: 0 0 1rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  flex: 1;
+}
+
+.maquette-card__meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.maquette-card__actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.maquettes-empty {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-muted);
+}
+
+.btn--sm {
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8rem;
+}

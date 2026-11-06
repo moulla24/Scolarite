@@ -1,0 +1,37 @@
+@if (viewState$ | async; as state) {
+  <header class="dashboard-header">
+    <div class="dashboard-header__titles">
+      <h1 class="dashboard-header__title">Tableau de bord</h1>
+      <p class="dashboard-header__subtitle">
+        @if (state.selectedLevelId === 'all') {
+          Vue d'ensemble de l'établissement — tous les niveaux
+        } @else {
+          Indicateurs pour le niveau <strong>{{ state.selectedLevelLabel }}</strong>
+        }
+      </p>
+    </div>
+    <div class="dashboard-header__actions">
+      <app-excel-page-actions
+        [showTemplate]="false"
+        [showImport]="false"
+        (exportClick)="onExport()"
+      />
+      <app-level-filter
+        [levels]="state.levels"
+        [selectedLevelId]="state.selectedLevelId"
+        (levelChange)="onLevelChange($event)"
+      />
+    </div>
+  </header>
+
+  <section class="dashboard-stats" aria-label="Indicateurs clés">
+    @for (stat of state.stats; track stat.id + '-' + stat.value) {
+      <app-stat-card [stat]="stat" />
+    }
+  </section>
+
+  <app-transactions-table
+    [transactions]="state.transactions"
+    [loading]="state.loading"
+  />
+}

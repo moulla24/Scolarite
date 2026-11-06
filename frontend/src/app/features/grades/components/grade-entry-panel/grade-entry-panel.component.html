@@ -1,0 +1,161 @@
+<section class="create-panel" aria-labelledby="grade-entry-title">
+  <header class="create-panel__header">
+    <div class="create-panel__title-row">
+      <span class="material-symbols-outlined create-panel__icon" aria-hidden="true">edit_note</span>
+      <div>
+        <h2 id="grade-entry-title" class="create-panel__title">Saisie des notes</h2>
+        <p class="create-panel__subtitle">Choisissez une évaluation et saisissez les notes par élève</p>
+      </div>
+    </div>
+    <button type="button" class="create-panel__close" aria-label="Fermer" (click)="onCancel()">
+      <span class="material-symbols-outlined" aria-hidden="true">close</span>
+    </button>
+  </header>
+
+  @if (errorMessage(); as err) {
+    <div class="create-panel__alert" role="alert">{{ err }}</div>
+  }
+
+  @if (classeId() === 'all') {
+    <p class="create-panel__alert">Sélectionnez une classe dans les filtres pour saisir les notes.</p>
+  } @else if (loading()) {
+    <p>Chargement…</p>
+  } @else {
+    <form class="create-panel__form" (ngSubmit)="onSubmit()">
+      <div class="create-panel__grid">
+        <div class="form-field form-field--wide">
+          <label class="form-field__label">
+            <input
+              type="radio"
+              name="evalMode"
+              [checked]="!useNewEvaluation()"
+              (change)="onToggleNewEvaluation(false)"
+            />
+            Évaluation existante
+          </label>
+          <label class="form-field__label" style="margin-left: 1rem">
+            <input
+              type="radio"
+              name="evalMode"
+              [checked]="useNewEvaluation()"
+              (change)="onToggleNewEvaluation(true)"
+            />
+            Nouvelle évaluation
+          </label>
+        </div>
+
+        @if (!useNewEvaluation()) {
+          <div class="form-field form-field--wide">
+            <label class="form-field__label" for="ge-eval">Évaluation</label>
+            <select
+              id="ge-eval"
+              class="form-field__input"
+              [ngModel]="evaluationId"
+              (ngModelChange)="onEvaluationChange($event)"
+              name="evaluationId"
+            >
+              <option value="">Choisir…</option>
+              @for (ev of evaluations(); track ev.id) {
+                <option [value]="ev.id">
+                  {{ ev.type }} — {{ ev.matiere }} ({{ ev.dateEvaluation }}, /{{ ev.noteMax }})
+                </option>
+              }
+            </select>
+          </div>
+        } @else {
+          <div class="form-field form-field--wide">
+            <label class="form-field__label" for="ge-ens">Enseignement *</label>
+            @if (enseignements().length === 0) {
+              <p class="create-panel__alert">
+                Aucune affectation pour cette classe/matière.
+                <a routerLink="/affectations">Créer une affectation</a>
+                (classe + matière + enseignant) avant de saisir des notes.
+              </p>
+            } @else {
+              <select
+                id="ge-ens"
+                class="form-field__input"
+                [(ngModel)]="enseignementId"
+                name="enseignementId"
+                required
+              >
+                <option value="">Choisir…</option>
+                @for (ens of enseignements(); track ens.id) {
+                  <option [value]="ens.id">{{ ens.libelle }}</option>
+                }
+              </select>
+            }
+          </div>
+          <div class="form-field">
+            <label class="form-field__label" for="ge-type">Type *</label>
+            <input
+              id="ge-type"
+              class="form-field__input"
+              type="text"
+              [(ngModel)]="newEvalType"
+              name="newEvalType"
+            />
+          </div>
+          <div class="form-field">
+            <label class="form-field__label" for="ge-date">Date *</label>
+            <input
+              id="ge-date"
+              class="form-field__input"
+              type="date"
+              [(ngModel)]="newEvalDate"
+              name="newEvalDate"
+            />
+          </div>
+          <div class="form-field">
+            <label class="form-field__label" for="ge-max">Note max *</label>
+            <input
+              id="ge-max"
+              class="form-field__input"
+              type="number"
+              min="1"
+              step="0.5"
+              [(ngModel)]="newEvalNoteMax"
+              name="newEvalNoteMax"
+            />
+          </div>
+        }
+      </div>
+
+      <div class="data-card" style="margin-top: 1rem">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Élève</th>
+              <th>Note</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of studentRows(); track row.eleveId) {
+              <tr>
+                <td>{{ row.nomComplet }}</td>
+                <td>
+                  <input
+                    class="form-field__input"
+                    type="text"
+                    inputmode="decimal"
+                    placeholder="—"
+                    [ngModel]="row.note"
+                    (ngModelChange)="patchStudentNote(row.eleveId, $event)"
+                    [name]="'note-' + row.eleveId"
+                  />
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <footer class="create-panel__actions">
+        <button type="button" class="btn btn--ghost" (click)="onCancel()" [disabled]="saving()">Annuler</button>
+        <button type="submit" class="btn btn--primary" [disabled]="saving()">
+          {{ saving() ? 'Enregistrement…' : 'Enregistrer les notes' }}
+        </button>
+      </footer>
+    </form>
+  }
+</section>

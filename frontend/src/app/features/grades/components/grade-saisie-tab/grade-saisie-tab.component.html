@@ -1,0 +1,71 @@
+@if (errorMessage(); as err) {
+  <div class="grades-alert grades-alert--error" role="alert">
+    {{ err }}
+    @if (err.includes('affectation')) {
+      <a routerLink="/affectations" class="grades-alert__link">Créer une affectation</a>
+    }
+  </div>
+}
+
+@if (!classeId() || classeId() === 'all' || !matiereId() || matiereId() === 'all') {
+  <div class="grades-hint">
+    <span class="material-symbols-outlined" aria-hidden="true">info</span>
+    Sélectionnez un <strong>niveau</strong>, une <strong>classe</strong> et une <strong>matière</strong> pour saisir les notes du trimestre courant.
+  </div>
+} @else if (loading()) {
+  <div class="grades-hint">Chargement de la grille de saisie…</div>
+} @else if (saisie()) {
+  <div class="saisie-header">
+    <span class="saisie-badge">Trimestre courant — {{ saisie()!.trimestreLibelle }}</span>
+  </div>
+
+  <div class="data-card">
+    <div class="data-card__wrap">
+      <table class="data-table saisie-table">
+        <thead>
+          <tr>
+            <th>Élève</th>
+            @for (col of colonnes(); track col.evaluationId) {
+              <th>{{ col.libelle }} /{{ col.noteMax }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @if (rows().length === 0) {
+            <tr>
+              <td [attr.colspan]="colonnes().length + 1" class="data-table__empty">
+                Aucun élève inscrit dans cette classe.
+              </td>
+            </tr>
+          } @else {
+            @for (row of rows(); track row.eleveId) {
+              <tr class="data-table__row">
+                <td class="cell-name-plain">{{ row.nomComplet }}</td>
+                @for (col of colonnes(); track col.evaluationId) {
+                  <td>
+                    <input
+                      type="text"
+                      class="saisie-input"
+                      inputmode="decimal"
+                      [ngModel]="row.notes[col.evaluationId]"
+                      (ngModelChange)="patchNote(row.eleveId, col.evaluationId, $event)"
+                      placeholder="—"
+                      [attr.aria-label]="col.libelle + ' pour ' + row.nomComplet"
+                    />
+                  </td>
+                }
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="page-save-bar">
+    <button type="button" class="btn btn--primary" [disabled]="saving()" (click)="onSave()">
+      <span class="material-symbols-outlined" aria-hidden="true">save</span>
+      {{ saving() ? 'Enregistrement…' : 'Enregistrer' }}
+    </button>
+  </div>
+}

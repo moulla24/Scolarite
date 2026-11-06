@@ -1,0 +1,79 @@
+<section class="create-panel" aria-labelledby="create-comptable-title">
+  <header class="create-panel__header">
+    <div class="create-panel__title-row">
+      <span class="material-symbols-outlined create-panel__icon" aria-hidden="true">account_balance</span>
+      <div>
+        <h2 id="create-comptable-title" class="create-panel__title">
+          {{ isEditMode() ? 'Modifier le comptable' : 'Nouveau comptable' }}
+        </h2>
+        <p class="create-panel__subtitle">
+          {{ isEditMode()
+            ? 'Mettez à jour les informations du compte comptable'
+            : 'Créez un compte comptable avec accès à la gestion financière (mot de passe initial : admin123)' }}
+        </p>
+      </div>
+    </div>
+    <button type="button" class="create-panel__close" aria-label="Fermer" (click)="onCancel()">
+      <span class="material-symbols-outlined" aria-hidden="true">close</span>
+    </button>
+  </header>
+
+  @if (loading()) {
+    <p class="create-panel__subtitle">Chargement…</p>
+  }
+
+  @if (errorMessage(); as err) {
+    <div class="create-panel__alert" role="alert">{{ err }}</div>
+  }
+
+  <form class="create-panel__form" (ngSubmit)="onSubmit()">
+    <div class="create-panel__grid">
+      <div class="form-field">
+        <label class="form-field__label" for="cpt-nom">Nom *</label>
+        <input id="cpt-nom" class="form-field__input" type="text"
+          [ngModel]="form().nom" (ngModelChange)="patchField('nom', $event)" name="nom" required />
+      </div>
+      <div class="form-field">
+        <label class="form-field__label" for="cpt-prenom">Prénom *</label>
+        <input id="cpt-prenom" class="form-field__input" type="text"
+          [ngModel]="form().prenom" (ngModelChange)="patchField('prenom', $event)" name="prenom" required />
+      </div>
+      <div class="form-field">
+        <label class="form-field__label" for="cpt-email">E-mail *</label>
+        <input id="cpt-email" class="form-field__input" type="email"
+          [ngModel]="form().email" (ngModelChange)="patchField('email', $event)" name="email" required />
+      </div>
+      <div class="form-field">
+        <label class="form-field__label" for="cpt-tel">Téléphone</label>
+        <input id="cpt-tel" class="form-field__input" type="tel"
+          [ngModel]="form().telephone" (ngModelChange)="patchField('telephone', $event)" name="telephone" />
+      </div>
+      <div class="form-field">
+        <label class="form-field__label" for="cpt-mat">Matricule</label>
+        <input id="cpt-mat" class="form-field__input" type="text" placeholder="CPT-002"
+          [ngModel]="form().matricule" (ngModelChange)="patchField('matricule', $event)" name="matricule" />
+      </div>
+      <div class="form-field">
+        <label class="form-field__label" for="cpt-date">Date d’embauche</label>
+        <input id="cpt-date" class="form-field__input" type="date"
+          [ngModel]="form().dateEmbauche" (ngModelChange)="patchField('dateEmbauche', $event)" name="dateEmbauche" />
+      </div>
+      <div class="form-field">
+        <label class="form-field__label" for="cpt-actif">Statut</label>
+        <select id="cpt-actif" class="form-field__input"
+          [ngModel]="form().actif" (ngModelChange)="patchField('actif', $event)" name="actif">
+          <option [ngValue]="true">Actif</option>
+          <option [ngValue]="false">Inactif</option>
+        </select>
+      </div>
+    </div>
+
+    <footer class="create-panel__actions">
+      <button type="button" class="btn btn--ghost" (click)="onCancel()" [disabled]="saving()">Annuler</button>
+      <button type="submit" class="btn btn--primary" [disabled]="saving() || loading()">
+        <span class="material-symbols-outlined" aria-hidden="true">save</span>
+        {{ saving() ? 'Enregistrement…' : (isEditMode() ? 'Enregistrer' : 'Créer le compte comptable') }}
+      </button>
+    </footer>
+  </form>
+</section>

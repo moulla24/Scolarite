@@ -1,0 +1,45 @@
+@if (pageState$ | async; as page) {
+  <app-page-header
+    title="Comptables"
+    subtitle="Gérez les comptes comptables et leur accès à la facturation, au journal et au bilan"
+  >
+    <div actions class="page-actions">
+      <button
+        type="button"
+        class="btn"
+        [class.btn--primary]="!page.showCreateForm"
+        [class.btn--outline]="page.showCreateForm"
+        (click)="onNew()"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">
+          {{ page.showCreateForm ? 'close' : 'person_add' }}
+        </span>
+        {{ page.showCreateForm ? 'Fermer' : 'Nouveau comptable' }}
+      </button>
+    </div>
+  </app-page-header>
+
+  <div class="toolbar-row">
+    <app-search-field
+      placeholder="Rechercher un comptable…"
+      [value]="page.view.searchQuery"
+      (valueChange)="onSearch($event)"
+    />
+  </div>
+
+  <app-filter-card [resultCount]="page.view.resultCount" resultLabel="comptables affichés" />
+
+  @if (page.showCreateForm) {
+    <app-comptable-create-panel
+      [editId]="page.editId"
+      (saved)="onSaved()"
+      (cancelled)="onCancelled()"
+    />
+  }
+
+  <app-comptables-table
+    [comptables]="page.view.comptables"
+    (edit)="onEdit($event)"
+    (delete)="onDelete($event, page.view.comptables)"
+  />
+}

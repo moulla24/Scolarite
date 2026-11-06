@@ -1,0 +1,55 @@
+<div class="data-card">
+  <div class="data-card__wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Enseignant</th>
+          <th>Contact</th>
+          <th>Matières</th>
+          <th>Classes</th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (teachers().length === 0) {
+          <tr><td colspan="6" class="data-table__empty">Aucun enseignant trouvé.</td></tr>
+        } @else {
+          @for (t of teachers(); track t.id) {
+            <tr class="data-table__row">
+              <td>
+                <div class="cell-name">
+                  <app-user-avatar [initials]="t.initials" [name]="t.fullName" />
+                  {{ t.fullName }}
+                </div>
+              </td>
+              <td>
+                <div class="cell-contact">
+                  <span>{{ t.phone }}</span>
+                  <span>{{ t.email }}</span>
+                </div>
+              </td>
+              <td>
+                @for (s of t.subjects; track s; let last = $last) {
+                  <span class="tag">{{ s }}</span>@if (!last) { }
+                }
+              </td>
+              <td>
+                @for (c of t.classes; track c; let last = $last) {
+                  {{ c }}@if (!last) {, }
+                }
+              </td>
+              <td><app-teacher-status-badge [status]="t.status" /></td>
+              <td>
+                <app-row-actions-menu
+                  (edit)="edit.emit(t.id)"
+                  (delete)="delete.emit(t.id)"
+                />
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

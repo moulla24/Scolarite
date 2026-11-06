@@ -1,0 +1,27 @@
+@use '../../styles/comptabilite';
+
+:host {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+  width: 100%;
+  min-width: 0;
+}
+
+.filter-field {
+  flex: 0 1 160px;
+  min-width: 140px;
+}
+
+.filter-field--search {
+  flex: 1 1 200px;
+  min-width: 180px;
+  max-width: 280px;
+}
+
+.filter-field__input {
+  width: 100%;
+  box-sizing: border-box;
+}

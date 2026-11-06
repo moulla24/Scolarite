@@ -1,0 +1,197 @@
+<app-page-header title="Soldes élèves" subtitle="Total à payer, montant payé, reste à payer, retards et remises">
+  @if (!showRemiseForm()) {
+    <div actions class="page-actions">
+      <button type="button" class="btn btn--primary" (click)="openRemiseForm()">
+        <span class="material-symbols-outlined">percent</span>
+        Ajouter une remise / bourse
+      </button>
+    </div>
+  }
+</app-page-header>
+
+@if (showRemiseForm()) {
+  <section class="detail-panel">
+    <h2 class="detail-panel__title">Nouvelle remise ou bourse</h2>
+    @if (remiseError(); as err) {
+      <div class="create-panel__alert" role="alert">{{ err }}</div>
+    }
+    <p class="solde-form__hint">Sélectionnez l'élève concerné, puis renseignez la remise.</p>
+    <div class="toolbar-row solde-form__filters">
+      <app-comptabilite-eleve-filters
+        [value]="formFilters()"
+        [allowAllEleves]="false"
+        elevePlaceholder="Sélectionner un élève…"
+        (valueChange)="onFormFiltersChange($event)"
+      />
+    </div>
+    <div class="detail-panel__grid">
+      <div class="form-field">
+        <label class="form-field__label">Type *</label>
+        <select class="form-field__input" [(ngModel)]="remiseForm.typeRemise">
+          @for (t of remiseTypes() | keyvalue; track t.key) {
+            <option [value]="t.key">{{ t.value }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="form-field__label">Pourcentage (%) *</label>
+        <input class="form-field__input" type="number" [(ngModel)]="remiseForm.pourcentage" min="0" max="100" />
+      </div>
+      <div class="form-field form-field--full">
+        <label class="form-field__label">Libellé *</label>
+        <input class="form-field__input" [(ngModel)]="remiseForm.libelle" placeholder="Ex. Réduction familiale" />
+      </div>
+    </div>
+    <div class="form-actions">
+      <button type="button" class="btn btn--ghost" (click)="cancelRemiseForm()">Annuler</button>
+      <button type="button" class="btn btn--primary" [disabled]="savingRemise()" (click)="submitRemise()">
+        {{ savingRemise() ? 'Enregistrement…' : 'Enregistrer la remise' }}
+      </button>
+    </div>
+  </section>
+}
+
+<div class="toolbar-row">
+  <app-comptabilite-eleve-filters
+    [value]="listFilters()"
+    [allowAllEleves]="false"
+    elevePlaceholder="Sélectionner un élève…"
+    (valueChange)="onListFiltersChange($event)"
+  />
+</div>
+
+@if (loading()) {
+  <p class="loading-msg">Chargement du solde…</p>
+}
+@if (!loading() && solde(); as s) {
+  <section class="solde-panel">
+    <h2>{{ s.eleveNom }} — {{ s.classe }} ({{ s.niveau }})</h2>
+    <div class="solde-panel__grid">
+      <article class="stat-card">
+        <p class="stat-card__label">Montant normal</p>
+        <p class="stat-card__value">{{ s.montantBrut | currencyMru }}</p>
+      </article>
+      <article class="stat-card">
+        <p class="stat-card__label">Réduction</p>
+        <p class="stat-card__value">{{ s.montantRemise | currencyMru }}</p>
+      </article>
+      <article class="stat-card">
+        <p class="stat-card__label">Pénalités</p>
+        <p class="stat-card__value">{{ s.montantPenalite | currencyMru }}</p>
+      </article>
+      <article class="stat-card">
+        <p class="stat-card__label">Total à payer</p>
+        <p class="stat-card__value">{{ s.montantTotal | currencyMru }}</p>
+      </article>
+      <article class="stat-card">
+        <p class="stat-card__label">Payé</p>
+        <p class="stat-card__value">{{ s.montantPaye | currencyMru }}</p>
+      </article>
+      <article class="stat-card">
+        <p class="stat-card__label">Reste</p>
+        <p class="stat-card__value"><app-balance-amount [amount]="s.resteAPayer" /></p>
+      </article>
+    </div>
+    @if (s.joursRetardMax > 0) {
+      <p class="solde-panel__alert">Retard : {{ s.joursRetardMax }} jour(s) — {{ s.facturesImpayees }} facture(s) impayée(s)</p>
+    }
+  </section>
+
+  <section class="data-card">
+    <h3>Échéances mensuelles</h3>
+    <div class="data-card__wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Libellé</th>
+            <th>Échéance</th>
+            <th>Montant</th>
+            <th>Statut</th>
+            <th>Retard</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (s.echeances.length === 0) {
+            <tr><td colspan="5" class="data-table__empty">Aucune échéance.</td></tr>
+          } @else {
+            @for (e of s.echeances; track e.id) {
+              <tr>
+                <td>{{ e.libelle }}</td>
+                <td>{{ e.dateEcheance | date: 'dd/MM/yyyy' }}</td>
+                <td>{{ e.montant | currencyMru }}</td>
+                <td>{{ e.statut === 'IMPAYEE' ? 'Non payée' : e.statut }}</td>
+                <td>{{ e.joursRetard > 0 ? e.joursRetard + ' jours' : '—' }}</td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  @if (s.historiqueRetards.length > 0) {
+    <section class="data-card">
+      <h3>Historique des retards</h3>
+      <div class="data-card__wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Échéance</th>
+              <th>Retard</th>
+              <th>Pénalité</th>
+              <th>Constat</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (h of s.historiqueRetards; track h.id) {
+              <tr>
+                <td>{{ h.libelleEcheance }}</td>
+                <td>{{ h.joursRetard }} jours</td>
+                <td>{{ h.montantPenalite | currencyMru }}</td>
+                <td>{{ h.dateConstat | date: 'dd/MM/yyyy' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+} @else if (!loading() && !listFilters().eleveId) {
+  <p class="empty-msg">Sélectionnez un niveau, une classe puis un élève pour afficher son solde.</p>
+}
+
+<section class="data-card">
+  <h3>Remises actives</h3>
+  <div class="data-card__wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Élève</th>
+          <th>Type</th>
+          <th>Réduction</th>
+          <th>Libellé</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (remises().length === 0) {
+          <tr><td colspan="4" class="data-table__empty">Aucune remise.</td></tr>
+        } @else {
+          @for (r of remises(); track r.id) {
+            <tr>
+              <td>{{ r.eleveNom }}</td>
+              <td>{{ r.typeRemiseLibelle }}</td>
+              <td>
+                @if (r.pourcentage != null) {
+                  {{ r.pourcentage }}%
+                } @else {
+                  {{ (r.montantFixe ?? 0) | currencyMru }}
+                }
+              </td>
+              <td>{{ r.libelle ?? '—' }}</td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

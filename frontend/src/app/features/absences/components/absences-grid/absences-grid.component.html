@@ -1,0 +1,67 @@
+@if (feuille(); as sheet) {
+  <div class="plage-tabs" role="tablist" aria-label="Plages horaires">
+    @for (plage of sheet.plages; track plage.plage; let i = $index) {
+      <button
+        type="button"
+        class="plage-tabs__tab"
+        role="tab"
+        [class.plage-tabs__tab--active]="selectedPlageIndex() === i"
+        [attr.aria-selected]="selectedPlageIndex() === i"
+        (click)="selectPlage(i)"
+      >
+        <span class="plage-tabs__matiere">{{ plage.libelle }}</span>
+      </button>
+    }
+  </div>
+
+  @for (plage of sheet.plages; track plage.plage; let i = $index) {
+    @if (selectedPlageIndex() === i) {
+      <section class="plage-panel" role="tabpanel">
+        <header class="plage-panel__header">
+          <div>
+            <h2 class="plage-panel__title">{{ plage.libelle }}</h2>
+          </div>
+          <p class="plage-panel__hint">Par défaut, tous les élèves sont marqués présents.</p>
+        </header>
+
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Élève</th>
+                <th>Présence</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (eleve of plage.eleves; track eleve.eleveId) {
+                <tr>
+                  <td>{{ eleve.nomComplet }}</td>
+                  <td>
+                    <div class="presence-toggle">
+                      <button
+                        type="button"
+                        class="presence-toggle__btn presence-toggle__btn--present"
+                        [class.presence-toggle__btn--active]="eleve.statut === 'PRESENT'"
+                        (click)="onStatutChange(plage.plage, eleve.eleveId, 'PRESENT')"
+                      >
+                        Présent
+                      </button>
+                      <button
+                        type="button"
+                        class="presence-toggle__btn presence-toggle__btn--absent"
+                        [class.presence-toggle__btn--active]="eleve.statut === 'ABSENT'"
+                        (click)="onStatutChange(plage.plage, eleve.eleveId, 'ABSENT')"
+                      >
+                        Absent
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    }
+  }
+}

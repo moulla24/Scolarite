@@ -1,0 +1,171 @@
+<div class="login-page">
+
+  <aside class="login-page__brand" aria-hidden="true">
+
+    <div class="login-page__brand-inner">
+
+      <span class="material-symbols-outlined login-page__brand-icon">school</span>
+
+      <h2 class="login-page__brand-title">{{ appName }}</h2>
+
+      <p class="login-page__brand-text">
+
+        Gestion de la scolarité primaire — administration, notes, présences et facturation.
+
+      </p>
+
+    </div>
+
+  </aside>
+
+
+
+  <main class="login-page__main">
+
+    <section class="login-card" aria-labelledby="login-title">
+
+      <header class="login-card__header">
+
+        <span class="material-symbols-outlined login-card__icon" aria-hidden="true">login</span>
+
+        <div>
+
+          <h1 id="login-title" class="login-card__title">Connexion</h1>
+
+          <p class="login-card__subtitle">Accédez à votre espace d’administration</p>
+
+        </div>
+
+      </header>
+
+
+
+      @if (errorMessage(); as err) {
+
+        <div class="login-card__alert" role="alert">
+
+          <span class="material-symbols-outlined" aria-hidden="true">error</span>
+
+          {{ err }}
+
+        </div>
+
+      }
+
+
+
+      <form class="login-card__form" [formGroup]="form" (ngSubmit)="onSubmit()">
+
+        <label class="login-field">
+
+          <span class="login-field__label">E-mail</span>
+
+          <span class="login-field__wrap">
+
+            <span class="material-symbols-outlined login-field__icon" aria-hidden="true">mail</span>
+
+            <input
+
+              class="login-field__input"
+
+              type="email"
+
+              formControlName="email"
+
+              autocomplete="username"
+
+              placeholder="nom@ecoli.mr"
+
+              (input)="clearError()"
+
+              [disabled]="loading()"
+
+            />
+
+          </span>
+
+        </label>
+
+
+
+        <label class="login-field">
+
+          <span class="login-field__label">Mot de passe</span>
+
+          <span class="login-field__wrap">
+
+            <span class="material-symbols-outlined login-field__icon" aria-hidden="true">lock</span>
+
+            <input
+
+              class="login-field__input login-field__input--password"
+
+              [type]="showPassword() ? 'text' : 'password'"
+
+              formControlName="password"
+
+              autocomplete="current-password"
+
+              placeholder="••••••••"
+
+              (input)="clearError()"
+
+              [disabled]="loading()"
+
+            />
+
+            <button
+
+              type="button"
+
+              class="login-field__toggle"
+
+              (click)="togglePassword()"
+
+              [attr.aria-label]="showPassword() ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+
+              [disabled]="loading()"
+
+            >
+
+              <span class="material-symbols-outlined" aria-hidden="true">
+
+                {{ showPassword() ? 'visibility_off' : 'visibility' }}
+
+              </span>
+
+            </button>
+
+          </span>
+
+        </label>
+
+
+
+        <button type="submit" class="login-card__submit" [disabled]="loading()">
+
+          @if (loading()) {
+
+            <span class="login-card__spinner" aria-hidden="true"></span>
+
+            Connexion en cours…
+
+          } @else {
+
+            <span class="material-symbols-outlined" aria-hidden="true">login</span>
+
+            Se connecter
+
+          }
+
+        </button>
+
+      </form>
+
+    </section>
+
+  </main>
+
+</div>
+
+

@@ -1,0 +1,26 @@
+<div class="comptabilite-shell">
+  <div class="comptabilite-shell__bar">
+    <a routerLink="/dashboard" class="comptabilite-shell__back">
+      <span class="material-symbols-outlined">arrow_back</span>
+      Accueil
+    </a>
+    <span class="comptabilite-shell__title">Comptabilité</span>
+  </div>
+
+  <nav class="comptabilite-shell__nav" aria-label="Navigation comptabilité">
+    @for (item of navItems; track item.route) {
+      <a
+        [routerLink]="item.route"
+        routerLinkActive="comptabilite-shell__nav-link--active"
+        [routerLinkActiveOptions]="{ exact: item.exact }"
+        class="comptabilite-shell__nav-link"
+      >
+        {{ item.label }}
+      </a>
+    }
+  </nav>
+
+  <main class="comptabilite-shell__content">
+    <router-outlet />
+  </main>
+</div>

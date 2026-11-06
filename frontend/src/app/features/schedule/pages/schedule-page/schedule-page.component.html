@@ -1,0 +1,177 @@
+@if (pageState$ | async; as page) {
+  <app-page-header
+    title="Emploi du temps"
+    [subtitle]="page.view.trimestre
+      ? 'Trimestre ' + page.view.trimestre.numero + ' — ' + page.view.trimestre.nom + ' · ' + page.view.trimestre.anneeScolaireNom
+      : 'Planning hebdomadaire des cours par classe, matière et salle'"
+  >
+    <div actions class="page-actions">
+      <app-excel-page-actions
+        [templateDownload]="downloadExcelTemplate"
+        (exportClick)="onExport()"
+        (importFile)="onImportFile($event)"
+      />
+      <button type="button" class="btn btn--outline" (click)="onPrint()">
+        <span class="material-symbols-outlined" aria-hidden="true">print</span>
+        Imprimer
+      </button>
+    </div>
+  </app-page-header>
+
+  <div class="schedule-toolbar">
+    <div class="schedule-toolbar__group">
+      <span class="material-symbols-outlined" aria-hidden="true">filter_list</span>
+      <label class="schedule-toolbar__label" for="sch-niveau">Niveau :</label>
+      <select
+        id="sch-niveau"
+        class="toolbar-select"
+        [ngModel]="page.view.selectedLevelId"
+        (ngModelChange)="onLevelChange($event)"
+      >
+        @for (opt of page.view.levelFilters; track opt.id) {
+          <option [value]="opt.id">{{ opt.label }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="schedule-toolbar__group">
+      <label class="schedule-toolbar__label" for="sch-class">Classe :</label>
+      <select
+        id="sch-class"
+        class="toolbar-select"
+        [ngModel]="page.view.selectedClassId"
+        (ngModelChange)="onClassChange($event)"
+      >
+        @for (opt of page.view.classFilters; track opt.id) {
+          <option [value]="opt.id">{{ opt.label }}</option>
+        }
+      </select>
+    </div>
+
+    @if (page.view.weeks.length > 0) {
+      <div class="schedule-toolbar__group schedule-toolbar__week">
+        <span class="material-symbols-outlined" aria-hidden="true">date_range</span>
+        <label class="schedule-toolbar__label" for="sch-week">Semaine :</label>
+        <div class="schedule-week-nav">
+          <button
+            type="button"
+            class="schedule-week-nav__btn"
+            aria-label="Semaine précédente"
+            [disabled]="page.view.selectedWeekIndex <= 0"
+            (click)="onPrevWeek(page.view)"
+          >
+            <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+          </button>
+          <select
+            id="sch-week"
+            class="toolbar-select schedule-week-nav__select"
+            [ngModel]="page.view.selectedWeekIndex"
+            (ngModelChange)="onWeekChange($event)"
+          >
+            @for (week of page.view.weeks; track week.index; let i = $index) {
+              <option [value]="i">{{ week.label }}</option>
+            }
+          </select>
+          <button
+            type="button"
+            class="schedule-week-nav__btn"
+            aria-label="Semaine suivante"
+            [disabled]="page.view.selectedWeekIndex >= page.view.weeks.length - 1"
+            (click)="onNextWeek(page.view)"
+          >
+            <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+          </button>
+        </div>
+        @if (!page.view.isCurrentWeekSelected) {
+          <button type="button" class="btn btn--ghost btn--sm" (click)="onCurrentWeek()">
+            Semaine actuelle
+          </button>
+        } @else {
+          <span class="schedule-toolbar__current-badge">Semaine en cours</span>
+        }
+      </div>
+    }
+
+    <span class="schedule-toolbar__hint">
+      @if (page.view.filtersReady) {
+        Cliquez sur une case pour planifier, modifier ou supprimer un cours
+      } @else {
+        Sélectionnez un niveau puis une classe pour afficher l’emploi du temps
+      }
+    </span>
+    @if (page.view.filtersReady) {
+      <span class="schedule-toolbar__info">{{ page.view.slots.length }} créneau(x) planifié(s)</span>
+    }
+  </div>
+
+  @if (!page.view.filtersReady) {
+    <div class="schedule-empty data-card" role="status">
+      <span class="material-symbols-outlined schedule-empty__icon" aria-hidden="true">filter_alt</span>
+      <p class="schedule-empty__title">Aucun emploi du temps affiché</p>
+      <p class="schedule-empty__text">
+        Choisissez un niveau et une classe précis dans les filtres ci-dessus.
+      </p>
+    </div>
+  } @else {
+  <div class="schedule-grid-wrap data-card">
+    <table class="schedule-grid">
+      <thead>
+        <tr>
+          <th class="schedule-grid__time-col">Horaire</th>
+          @for (day of page.view.days; track day.index) {
+            <th>
+              <span class="schedule-grid__day-name">{{ day.label }}</span>
+              @if (day.dateLabel) {
+                <span class="schedule-grid__day-date">{{ day.dateLabel }}</span>
+              }
+            </th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (time of page.view.timeRows; track time) {
+          <tr>
+            <td class="schedule-grid__time">{{ time }}</td>
+            @for (day of page.view.days; track day.index) {
+              <td>
+                @if (getSlot(page.view.grid, day.index, time); as slot) {
+                  <button
+                    type="button"
+                    class="schedule-cell"
+                    [attr.aria-label]="'Modifier ' + slot.subject + ' le ' + day.label + ' à ' + time"
+                    (click)="onCellClick(page.view, day, time, slot)"
+                  >
+                    <strong>{{ slot.subject }}</strong>
+                    <span>{{ slot.className }}</span>
+                    <span class="schedule-cell__meta">{{ slot.teacherName }}</span>
+                    @if (slot.room && slot.room !== '—') {
+                      <span class="schedule-cell__room">{{ slot.room }}</span>
+                    }
+                  </button>
+                } @else {
+                  <button
+                    type="button"
+                    class="schedule-cell schedule-cell--empty"
+                    [attr.aria-label]="'Planifier un cours le ' + day.label + ' à ' + time"
+                    (click)="onCellClick(page.view, day, time, undefined)"
+                  >
+                    <span class="material-symbols-outlined schedule-cell__add" aria-hidden="true">add</span>
+                  </button>
+                }
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  }
+}
+
+@if (cellEditor(); as editorCtx) {
+  <app-schedule-cell-editor
+    [context]="editorCtx"
+    (saved)="onCellEditorSaved()"
+    (cancelled)="onCellEditorCancelled()"
+  />
+}

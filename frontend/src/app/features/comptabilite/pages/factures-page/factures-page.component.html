@@ -1,0 +1,121 @@
+@if (viewState$ | async; as state) {
+  <app-page-header
+    title="Factures"
+    subtitle="Consultez et suivez toutes les factures scolaires des élèves"
+  />
+
+  <div class="toolbar-row">
+    <app-search-field
+      placeholder="Rechercher par n° facture…"
+      [value]="state.search"
+      (valueChange)="onSearch($event)"
+    />
+    <app-comptabilite-eleve-filters
+      [value]="state.eleveFilters"
+      (valueChange)="onEleveFiltersChange($event)"
+    />
+    <div class="filter-field filter-field--statut">
+      <label class="filter-field__label" for="f-statut">Statut</label>
+      <select id="f-statut" class="filter-field__select" [ngModel]="state.statut" (ngModelChange)="onStatutChange($event)">
+        <option value="all">Tous</option>
+        <option value="IMPAYEE">Impayées</option>
+        <option value="PARTIELLE">Partielles</option>
+        <option value="PAYEE">Payées</option>
+      </select>
+    </div>
+  </div>
+
+  <app-filter-card [resultCount]="state.count" resultLabel="factures affichées" />
+
+  @if (selectedFacture(); as detail) {
+    <section class="detail-panel">
+      <header class="detail-panel__header">
+        <div>
+          <h2 class="detail-panel__title">{{ detail.numero }}</h2>
+          <app-facture-status-badge [status]="detail.statut" />
+        </div>
+      </header>
+      <div class="detail-panel__grid">
+        <div><p class="detail-panel__label">Élève</p><p class="detail-panel__value">{{ detail.eleveNom }}</p></div>
+        <div><p class="detail-panel__label">Parent</p><p class="detail-panel__value">{{ detail.parentNom }}</p></div>
+        <div><p class="detail-panel__label">Téléphone</p><p class="detail-panel__value">{{ detail.parentTelephone || '—' }}</p></div>
+        <div><p class="detail-panel__label">Niveau</p><p class="detail-panel__value">{{ detail.niveau }}</p></div>
+        <div><p class="detail-panel__label">Émission</p><p class="detail-panel__value">{{ detail.dateEmission | date: 'dd/MM/yyyy' }}</p></div>
+        <div><p class="detail-panel__label">Échéance</p><p class="detail-panel__value">{{ detail.dateEcheance | date: 'dd/MM/yyyy' }}</p></div>
+        <div><p class="detail-panel__label">Total</p><p class="detail-panel__value">{{ detail.montantTotal | currencyMru }}</p></div>
+        <div><p class="detail-panel__label">Reste à payer</p><p class="detail-panel__value"><app-balance-amount [amount]="detail.resteAPayer" /></p></div>
+      </div>
+      <h3>Lignes de facture</h3>
+      <table class="data-table">
+        <thead><tr><th>Libellé</th><th>Montant</th></tr></thead>
+        <tbody>
+          @for (l of detail.lignes; track l.id) {
+            <tr><td>{{ l.libelle }}</td><td>{{ l.montant | currencyMru }}</td></tr>
+          }
+        </tbody>
+      </table>
+      @if (detail.paiements.length > 0) {
+        <h3>Paiements associés</h3>
+        <table class="data-table">
+          <thead><tr><th>Date</th><th>Mode</th><th>Réf.</th><th>Montant</th></tr></thead>
+          <tbody>
+            @for (p of detail.paiements; track p.id) {
+              <tr>
+                <td>{{ p.datePaiement | date: 'dd/MM/yyyy' }}</td>
+                <td>{{ p.modePaiement }}</td>
+                <td>{{ p.reference || '—' }}</td>
+                <td>{{ p.montant | currencyMru }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+      <div class="form-actions">
+        <button type="button" class="btn btn--ghost" (click)="closeDetail()">Fermer</button>
+        <span></span>
+      </div>
+    </section>
+  }
+
+  <div class="data-card">
+    <div class="data-card__wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>N° Facture</th>
+            <th>Élève / Parent</th>
+            <th>Niveau</th>
+            <th>Échéance</th>
+            <th>Total</th>
+            <th>Reste</th>
+            <th>Statut</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (state.factures.length === 0) {
+            <tr><td colspan="8" class="data-table__empty">Aucune facture trouvée.</td></tr>
+          } @else {
+            @for (f of state.factures; track f.id) {
+              <tr class="data-table__row">
+                <td><strong>{{ f.numero }}</strong></td>
+                <td>
+                  <div>{{ f.eleveNom }}</div>
+                  <small class="text-muted">{{ f.parentNom }}</small>
+                </td>
+                <td>{{ f.niveau }}</td>
+                <td>{{ f.dateEcheance | date: 'dd/MM/yyyy' }}</td>
+                <td>{{ f.montantTotal | currencyMru }}</td>
+                <td><app-balance-amount [amount]="f.resteAPayer" /></td>
+                <td><app-facture-status-badge [status]="f.statut" /></td>
+                <td>
+                  <button type="button" class="btn btn--ghost btn--sm" (click)="openDetail(f)">Détail</button>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}

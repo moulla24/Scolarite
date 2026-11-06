@@ -1,0 +1,33 @@
+<div class="maquette-grid">
+  @if (matieres().length === 0) {
+    <p class="maquette-grid__empty">Aucune matière dans la maquette. Ajoutez une matière ou configurez les affectations.</p>
+  } @else {
+    @for (m of matieres(); track m.id) {
+      <article
+        class="maquette-card"
+        [class.maquette-card--active]="selectedId() === m.id"
+        role="button"
+        tabindex="0"
+        (click)="selectMatiere.emit(m.id)"
+        (keyup.enter)="selectMatiere.emit(m.id)"
+      >
+        <header class="maquette-card__header">
+          <h3 class="maquette-card__title">{{ m.matiere }}</h3>
+          <button
+            type="button"
+            class="maquette-card__remove"
+            title="Retirer cette matière"
+            (click)="$event.stopPropagation(); removeMatiere.emit(m.id)"
+          >
+            <span class="material-symbols-outlined" aria-hidden="true">close</span>
+          </button>
+        </header>
+        <p class="maquette-card__vh">
+          <span class="maquette-card__label">Volume horaire</span>
+          <strong>{{ m.volumeHoraire }} h/sem</strong>
+        </p>
+        <p class="maquette-card__chapters">{{ m.nombreChapitres }} chapitre{{ m.nombreChapitres > 1 ? 's' : '' }}</p>
+      </article>
+    }
+  }
+</div>

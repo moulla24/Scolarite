@@ -1,0 +1,100 @@
+.grades-summary-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.75rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: var(--color-primary-bg);
+  color: var(--color-primary-dark);
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+
+.cell-name-plain {
+  font-weight: 600;
+  color: var(--text-primary) !important;
+}
+
+.btn--sm {
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8rem;
+}
+
+.grades-table-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius-lg);
+  background: var(--color-primary-bg);
+  border: 1px solid rgba(37, 99, 235, 0.15);
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+
+  .material-symbols-outlined {
+    color: var(--color-primary);
+    flex-shrink: 0;
+  }
+
+  &--error {
+    background: #fef2f2;
+    border-color: rgba(220, 38, 38, 0.2);
+    color: #991b1b;
+
+    .material-symbols-outlined {
+      color: #dc2626;
+    }
+  }
+}
+
+.grades-matrix {
+  min-width: 640px;
+
+  &__sticky {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--surface-card);
+    box-shadow: 4px 0 8px -4px rgba(15, 23, 42, 0.08);
+  }
+
+  thead th.grades-matrix__sticky {
+    background: var(--surface-elevated);
+  }
+
+  &__eval {
+    min-width: 7rem;
+    text-align: center !important;
+    white-space: normal;
+  }
+
+  &__eval-type {
+    display: block;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 0.78rem;
+  }
+
+  &__eval-meta {
+    display: block;
+    font-weight: 500;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  &__note {
+    text-align: center !important;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  &__empty-note {
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+}

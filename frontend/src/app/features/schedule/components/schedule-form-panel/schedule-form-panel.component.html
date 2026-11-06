@@ -1,0 +1,149 @@
+<section class="create-panel" aria-labelledby="schedule-form-title">
+  <header class="create-panel__header">
+    <div class="create-panel__title-row">
+      <span class="material-symbols-outlined create-panel__icon" aria-hidden="true">edit_calendar</span>
+      <div>
+        <h2 id="schedule-form-title" class="create-panel__title">
+          {{ editSlot() ? 'Modifier un créneau' : 'Ajouter un créneau' }}
+        </h2>
+        <p class="create-panel__subtitle">Planning hebdomadaire (lundi–vendredi)</p>
+      </div>
+    </div>
+    <button type="button" class="create-panel__close" aria-label="Fermer" (click)="onCancel()">
+      <span class="material-symbols-outlined" aria-hidden="true">close</span>
+    </button>
+  </header>
+
+  @if (errorMessage(); as err) {
+    <div class="create-panel__alert" role="alert">{{ err }}</div>
+  }
+
+  <form class="create-panel__form" (ngSubmit)="onSubmit()">
+    <div class="create-panel__grid">
+      <div class="form-field">
+        <label class="form-field__label" for="sch-classe">Classe *</label>
+        <select
+          id="sch-classe"
+          class="form-field__input"
+          [ngModel]="form().classeId"
+          (ngModelChange)="patchField('classeId', $event)"
+          name="classeId"
+        >
+          <option value="">Choisir…</option>
+          @for (c of classOptions(); track c.id) {
+            <option [value]="c.id">{{ c.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label class="form-field__label" for="sch-matiere">Matière *</label>
+        <select
+          id="sch-matiere"
+          class="form-field__input"
+          [ngModel]="form().matiereId"
+          (ngModelChange)="patchField('matiereId', $event)"
+          name="matiereId"
+        >
+          <option value="">Choisir…</option>
+          @for (m of subjectOptions(); track m.id) {
+            <option [value]="m.id">{{ m.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label class="form-field__label" for="sch-ens">Enseignant *</label>
+        <select
+          id="sch-ens"
+          class="form-field__input"
+          [ngModel]="form().enseignantId"
+          (ngModelChange)="patchField('enseignantId', $event)"
+          name="enseignantId"
+        >
+          <option value="">Choisir…</option>
+          @for (t of teacherOptions(); track t.id) {
+            <option [value]="t.id">{{ t.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label class="form-field__label" for="sch-jour">Jour *</label>
+        <select
+          id="sch-jour"
+          class="form-field__input"
+          [ngModel]="form().jourSemaine"
+          (ngModelChange)="patchField('jourSemaine', $event)"
+          name="jourSemaine"
+        >
+          <option value="1">Lundi</option>
+          <option value="2">Mardi</option>
+          <option value="3">Mercredi</option>
+          <option value="4">Jeudi</option>
+          <option value="5">Vendredi</option>
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label class="form-field__label" for="sch-debut">Heure début *</label>
+        <input
+          id="sch-debut"
+          class="form-field__input"
+          type="time"
+          [ngModel]="form().heureDebut"
+          (ngModelChange)="patchField('heureDebut', $event)"
+          name="heureDebut"
+        />
+      </div>
+
+      <div class="form-field">
+        <label class="form-field__label" for="sch-fin">Heure fin *</label>
+        <input
+          id="sch-fin"
+          class="form-field__input"
+          type="time"
+          [ngModel]="form().heureFin"
+          (ngModelChange)="patchField('heureFin', $event)"
+          name="heureFin"
+        />
+      </div>
+
+      <div class="form-field">
+        <label class="form-field__label" for="sch-salle">Salle</label>
+        <input
+          id="sch-salle"
+          class="form-field__input"
+          type="text"
+          [ngModel]="form().salle"
+          (ngModelChange)="patchField('salle', $event)"
+          name="salle"
+        />
+      </div>
+
+      <div class="form-field">
+        <label class="form-field__label" for="sch-type">Type *</label>
+        <input
+          id="sch-type"
+          class="form-field__input"
+          type="text"
+          [ngModel]="form().type"
+          (ngModelChange)="patchField('type', $event)"
+          name="type"
+        />
+      </div>
+    </div>
+
+    <footer class="create-panel__actions">
+      @if (editSlot()) {
+        <button type="button" class="btn btn--outline" (click)="onDelete()" [disabled]="saving()">
+          Supprimer
+        </button>
+      }
+      <button type="button" class="btn btn--ghost" (click)="onCancel()" [disabled]="saving()">Annuler</button>
+      <button type="submit" class="btn btn--primary" [disabled]="saving()">
+        {{ saving() ? 'Enregistrement…' : 'Enregistrer' }}
+      </button>
+    </footer>
+  </form>
+</section>

@@ -1,0 +1,21 @@
+@use '../../styles/comptabilite';
+
+.paie-stats {
+  margin-bottom: 1.25rem;
+}
+
+.tag--warning {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.data-table__row--paid {
+  opacity: 0.85;
+}
+
+.tag {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+}

@@ -1,0 +1,153 @@
+<section class="create-panel" aria-labelledby="create-maquette-title">
+  <header class="create-panel__header">
+    <div class="create-panel__title-row">
+      <span class="material-symbols-outlined create-panel__icon" aria-hidden="true">upload_file</span>
+      <div>
+        <h2 id="create-maquette-title" class="create-panel__title">Nouvelle maquette</h2>
+        <p class="create-panel__subtitle">Ajoutez une progression, séquence ou support de cours</p>
+      </div>
+    </div>
+    <button type="button" class="create-panel__close" aria-label="Fermer" (click)="onCancel()">
+      <span class="material-symbols-outlined" aria-hidden="true">close</span>
+    </button>
+  </header>
+
+  @if (errorMessage(); as err) {
+    <div class="create-panel__alert" role="alert">{{ err }}</div>
+  }
+
+  <form class="create-panel__form" (ngSubmit)="onSubmit()">
+    <div class="create-panel__grid">
+      <div class="form-field form-field--wide">
+        <label class="form-field__label" for="mq-titre">Titre *</label>
+        <input
+          id="mq-titre"
+          class="form-field__input"
+          type="text"
+          placeholder="Progression annuelle — Français"
+          [ngModel]="form().titre"
+          (ngModelChange)="patchField('titre', $event)"
+          name="titre"
+          required
+        />
+      </div>
+
+      <div class="form-field">
+        <label class="form-field__label" for="mq-matiere">Matière *</label>
+        <select
+          id="mq-matiere"
+          class="form-field__input"
+          [ngModel]="form().matiereId"
+          (ngModelChange)="patchField('matiereId', $event)"
+          name="matiereId"
+          required
+        >
+          <option value="">Choisir…</option>
+          @for (m of subjectOptions(); track m.id) {
+            <option [value]="m.id">{{ m.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label class="form-field__label" for="mq-niveau">Niveau *</label>
+        <select
+          id="mq-niveau"
+          class="form-field__input"
+          [ngModel]="form().niveauId"
+          (ngModelChange)="patchField('niveauId', $event)"
+          name="niveauId"
+          required
+        >
+          <option value="">Choisir…</option>
+          @for (n of levelOptions(); track n.id) {
+            <option [value]="n.id">{{ n.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label class="form-field__label" for="mq-format">Format *</label>
+        <select
+          id="mq-format"
+          class="form-field__input"
+          [ngModel]="form().format"
+          (ngModelChange)="patchField('format', $event)"
+          name="format"
+        >
+          <option value="PDF">PDF</option>
+          <option value="DOCX">DOCX</option>
+          <option value="PPTX">PPTX</option>
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label class="form-field__label" for="mq-pages">Nombre de pages</label>
+        <input
+          id="mq-pages"
+          class="form-field__input"
+          type="number"
+          min="0"
+          [ngModel]="form().nbPages"
+          (ngModelChange)="patchField('nbPages', $event)"
+          name="nbPages"
+        />
+      </div>
+
+      <div class="form-field">
+        <label class="form-field__label" for="mq-date">Date de mise à jour</label>
+        <input
+          id="mq-date"
+          class="form-field__input"
+          type="date"
+          [ngModel]="form().dateMaj"
+          (ngModelChange)="patchField('dateMaj', $event)"
+          name="dateMaj"
+        />
+      </div>
+
+      <div class="form-field form-field--wide">
+        <label class="form-field__label" for="mq-file">Fichier</label>
+        <input
+          id="mq-file"
+          class="form-field__input"
+          type="file"
+          (change)="onFileSelected($event)"
+        />
+      </div>
+
+      <div class="form-field form-field--wide">
+        <label class="form-field__label" for="mq-url">Lien du fichier (URL, optionnel)</label>
+        <input
+          id="mq-url"
+          class="form-field__input"
+          type="url"
+          placeholder="https://…"
+          [ngModel]="form().fichierUrl"
+          (ngModelChange)="patchField('fichierUrl', $event)"
+          name="fichierUrl"
+        />
+      </div>
+
+      <div class="form-field form-field--wide">
+        <label class="form-field__label" for="mq-desc">Description</label>
+        <textarea
+          id="mq-desc"
+          class="form-field__input form-field__textarea"
+          rows="3"
+          [ngModel]="form().description"
+          (ngModelChange)="patchField('description', $event)"
+          name="description"
+        ></textarea>
+      </div>
+    </div>
+
+    <footer class="create-panel__actions">
+      <button type="button" class="btn btn--ghost" (click)="onCancel()" [disabled]="saving()">Annuler</button>
+      <button type="submit" class="btn btn--primary" [disabled]="saving()">
+        <span class="material-symbols-outlined" aria-hidden="true">save</span>
+        {{ saving() ? 'Enregistrement…' : 'Enregistrer la maquette' }}
+      </button>
+    </footer>
+  </form>
+</section>

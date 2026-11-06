@@ -1,0 +1,191 @@
+<app-page-header
+  title="Bilan comptable"
+  subtitle="Situation financière par période — recettes, charges et ajustements manuels"
+>
+  <div actions class="page-actions">
+    <button type="button" class="btn btn--primary" (click)="openCreate()">
+      <span class="material-symbols-outlined">edit_note</span>
+      Ajouter un ajustement
+    </button>
+  </div>
+</app-page-header>
+
+<div class="toolbar-row">
+  <div class="filter-field">
+    <label class="filter-field__label">Période — du</label>
+    <input class="filter-field__input" type="date" [ngModel]="from()" (ngModelChange)="from.set($event)" />
+  </div>
+  <div class="filter-field">
+    <label class="filter-field__label">Au</label>
+    <input class="filter-field__input" type="date" [ngModel]="to()" (ngModelChange)="to.set($event)" />
+  </div>
+  <button type="button" class="btn btn--primary" (click)="load()">Appliquer</button>
+  <button type="button" class="btn btn--ghost" (click)="resetPeriod()">Mois en cours</button>
+</div>
+
+@if (showForm()) {
+  <section class="detail-panel ajustement-form">
+    <h2 class="detail-panel__title">{{ editId() ? 'Modifier l\'ajustement' : 'Nouvel ajustement comptable' }}</h2>
+    <p class="ajustement-form__hint">Les ajustements mettent à jour le bilan et apparaissent dans le journal.</p>
+    <div class="ajustement-form__grid">
+      <div class="filter-field">
+        <label class="filter-field__label">Date</label>
+        <input class="filter-field__input" type="date" [(ngModel)]="form.dateEcriture" />
+      </div>
+      <div class="filter-field ajustement-form__full">
+        <label class="filter-field__label">Libellé</label>
+        <input class="filter-field__input" [(ngModel)]="form.libelle" placeholder="Ex. Ajustement trésorerie" />
+      </div>
+      <div class="filter-field">
+        <label class="filter-field__label">Débit</label>
+        <select class="filter-field__select" [(ngModel)]="form.compteDebit">
+          @for (c of comptes; track c.code) {
+            <option [value]="c.code">{{ c.label }}</option>
+          }
+        </select>
+      </div>
+      <div class="filter-field">
+        <label class="filter-field__label">Crédit</label>
+        <select class="filter-field__select" [(ngModel)]="form.compteCredit">
+          @for (c of comptes; track c.code) {
+            <option [value]="c.code">{{ c.label }}</option>
+          }
+        </select>
+      </div>
+      <div class="filter-field">
+        <label class="filter-field__label">Montant (MRU)</label>
+        <input class="filter-field__input" type="number" [(ngModel)]="form.montant" min="0" />
+      </div>
+    </div>
+    <div class="form-actions">
+      <button type="button" class="btn btn--ghost" (click)="cancelForm()">Annuler</button>
+      <button type="button" class="btn btn--primary" [disabled]="saving()" (click)="save()">
+        {{ saving() ? 'Enregistrement…' : 'Enregistrer' }}
+      </button>
+    </div>
+  </section>
+}
+
+@if (loading()) {
+  <p>Chargement du bilan…</p>
+} @else {
+  @if (bilan(); as b) {
+  <p class="bilan-period">
+    Période du <strong>{{ b.periodeDebut | date: 'dd/MM/yyyy' }}</strong>
+    au <strong>{{ b.periodeFin | date: 'dd/MM/yyyy' }}</strong>
+  </p>
+
+  <section class="comptabilite-stats bilan-summary">
+    <article class="stat-card">
+      <p class="stat-card__label">Recettes scolaires</p>
+      <p class="stat-card__value stat-card__value--success">{{ b.produitsScolaires | currencyMru }}</p>
+    </article>
+    <article class="stat-card">
+      <p class="stat-card__label">Charges personnel</p>
+      <p class="stat-card__value stat-card__value--warning">{{ b.chargesPersonnel | currencyMru }}</p>
+    </article>
+    <article class="stat-card">
+      <p class="stat-card__label">Résultat net</p>
+      <p class="stat-card__value" [class.stat-card__value--success]="b.resultatNet >= 0" [class.stat-card__value--danger]="b.resultatNet < 0">
+        {{ b.resultatNet | currencyMru }}
+      </p>
+    </article>
+    <article class="stat-card">
+      <p class="stat-card__label">Trésorerie nette</p>
+      <p class="stat-card__value">{{ b.tresorerieNette | currencyMru }}</p>
+    </article>
+    <article class="stat-card">
+      <p class="stat-card__label">Créances clients</p>
+      <p class="stat-card__value">{{ b.creancesClients | currencyMru }}</p>
+    </article>
+  </section>
+
+  <section class="bilan-section bilan-section--resultat">
+    <h2 class="bilan-section__title">Compte de résultat (période)</h2>
+    <table class="data-table">
+      <thead><tr><th>Compte</th><th>Libellé</th><th>Montant</th></tr></thead>
+      <tbody>
+        @for (l of b.resultat; track l.compte + l.libelle) {
+          <tr [class.bilan-row--total]="l.compte === 'R'">
+            <td><strong>{{ l.compte }}</strong></td>
+            <td>{{ l.libelle }}</td>
+            <td [class.text-success]="l.montant >= 0" [class.text-danger]="l.montant < 0">
+              {{ l.montant | currencyMru }}
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </section>
+
+  <section class="bilan-section bilan-section--ajustements">
+    <header class="bilan-section__header">
+      <h2 class="bilan-section__title">Ajustements manuels (période)</h2>
+    </header>
+    @if (ajustements().length === 0) {
+      <p class="text-muted">Aucun ajustement — cliquez sur « Ajouter un ajustement » pour corriger le bilan.</p>
+    } @else {
+      <table class="data-table">
+        <thead><tr><th>Date</th><th>Libellé</th><th>Débit</th><th>Crédit</th><th>Montant</th><th></th></tr></thead>
+        <tbody>
+          @for (a of ajustements(); track a.id) {
+            <tr>
+              <td>{{ a.dateEcriture | date: 'dd/MM/yyyy' }}</td>
+              <td>{{ a.libelle }}</td>
+              <td>{{ a.compteDebit }}</td>
+              <td>{{ a.compteCredit }}</td>
+              <td>{{ a.montant | currencyMru }}</td>
+              <td class="data-table__actions">
+                <button type="button" class="btn btn--ghost btn--sm" (click)="openEdit(a)">Modifier</button>
+                <button type="button" class="btn btn--ghost btn--sm" (click)="deleteAjustement(a)">Supprimer</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </section>
+
+  <div class="bilan-grid">
+    <section class="bilan-section">
+      <h2 class="bilan-section__title">Actif</h2>
+      <table class="data-table">
+        <thead><tr><th>Compte</th><th>Libellé</th><th>Montant</th></tr></thead>
+        <tbody>
+          @for (l of b.actif; track l.compte) {
+            <tr>
+              <td><strong>{{ l.compte }}</strong></td>
+              <td>{{ l.libelle }}</td>
+              <td>{{ l.montant | currencyMru }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      <div class="bilan-section__total">
+        <span>Total actif</span>
+        <span>{{ b.totalActif | currencyMru }}</span>
+      </div>
+    </section>
+
+    <section class="bilan-section">
+      <h2 class="bilan-section__title">Passif</h2>
+      <table class="data-table">
+        <thead><tr><th>Compte</th><th>Libellé</th><th>Montant</th></tr></thead>
+        <tbody>
+          @for (l of b.passif; track l.compte) {
+            <tr>
+              <td><strong>{{ l.compte }}</strong></td>
+              <td>{{ l.libelle }}</td>
+              <td>{{ l.montant | currencyMru }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      <div class="bilan-section__total">
+        <span>Total passif</span>
+        <span>{{ b.totalPassif | currencyMru }}</span>
+      </div>
+    </section>
+  </div>
+  }
+}

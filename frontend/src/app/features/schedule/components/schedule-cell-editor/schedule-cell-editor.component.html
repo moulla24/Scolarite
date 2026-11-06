@@ -1,0 +1,118 @@
+<div class="cell-editor-backdrop" role="presentation" (click)="onCancel()">
+  <div
+    class="cell-editor"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-labelledby]="'cell-editor-title'"
+    (click)="$event.stopPropagation()"
+  >
+    <header class="cell-editor__header">
+      <div>
+        <h2 id="cell-editor-title" class="cell-editor__title">
+          {{ isEditMode() ? 'Modifier le créneau' : 'Planifier un cours' }}
+        </h2>
+        <p class="cell-editor__subtitle">
+          {{ context().dayLabel }}
+          @if (context().dateLabel) {
+            <span> · {{ context().dateLabel }}</span>
+          }
+          · {{ context().timeLabel }} · {{ context().classLabel }}
+        </p>
+      </div>
+      <button type="button" class="cell-editor__close" aria-label="Fermer" (click)="onCancel()">
+        <span class="material-symbols-outlined" aria-hidden="true">close</span>
+      </button>
+    </header>
+
+    @if (errorMessage(); as err) {
+      <div class="cell-editor__alert" role="alert">{{ err }}</div>
+    }
+
+    @if (loadingAssignments()) {
+      <p class="cell-editor__hint">Chargement des affectations…</p>
+    } @else if (!hasAssignments()) {
+      <p class="cell-editor__hint cell-editor__hint--warn">
+        Aucune affectation matière / enseignant pour cette classe. Configurez-les d’abord dans
+        « Affectations ».
+      </p>
+    } @else {
+      <p class="cell-editor__hint">
+        Matières et enseignants proposés selon les affectations de {{ context().classLabel }}.
+      </p>
+    }
+
+    <form class="cell-editor__form" (ngSubmit)="onSubmit()">
+      <div class="form-field">
+        <label class="form-field__label" for="cell-matiere">Matière *</label>
+        <select
+          id="cell-matiere"
+          class="form-field__input"
+          [ngModel]="matiereId()"
+          (ngModelChange)="onMatiereChange($event)"
+          name="matiereId"
+          [disabled]="!hasAssignments() || loadingAssignments()"
+          required
+        >
+          <option value="">Choisir une matière…</option>
+          @for (m of subjectOptions(); track m.id) {
+            <option [value]="m.id">{{ m.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label class="form-field__label" for="cell-ens">Enseignant *</label>
+        <select
+          id="cell-ens"
+          class="form-field__input"
+          [ngModel]="enseignantId()"
+          (ngModelChange)="enseignantId.set($event)"
+          name="enseignantId"
+          [disabled]="!matiereId() || loadingAssignments()"
+          required
+        >
+          <option value="">Choisir un enseignant…</option>
+          @for (t of teacherOptions(); track t.id) {
+            <option [value]="t.id">{{ t.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label class="form-field__label" for="cell-salle">Salle</label>
+        <input
+          id="cell-salle"
+          class="form-field__input"
+          type="text"
+          placeholder="Ex. Salle 12"
+          [ngModel]="salle()"
+          (ngModelChange)="salle.set($event)"
+          name="salle"
+        />
+      </div>
+
+      <footer class="cell-editor__actions">
+        @if (isEditMode()) {
+          <button
+            type="button"
+            class="btn btn--outline cell-editor__actions-left"
+            (click)="onDelete()"
+            [disabled]="saving()"
+          >
+            Supprimer
+          </button>
+        }
+        <button type="button" class="btn btn--ghost" (click)="onCancel()" [disabled]="saving()">
+          Annuler
+        </button>
+        <button
+          type="submit"
+          class="btn btn--primary"
+          [disabled]="saving() || !hasAssignments() || loadingAssignments()"
+        >
+          {{ saving() ? 'Enregistrement…' : (isEditMode() ? 'Enregistrer' : 'Affecter') }}
+        </button>
+      </footer>
+    </form>
+  </div>
+</div>

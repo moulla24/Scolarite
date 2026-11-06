@@ -1,0 +1,16 @@
+<article class="stat-card" [attr.data-accent]="stat().accent">
+  <div class="stat-card__body">
+    <span class="stat-card__title">{{ stat().title }}</span>
+    <span class="stat-card__value">{{ stat().value }}</span>
+    <span
+      class="stat-card__detail"
+      [class.stat-card__detail--up]="stat().trend === 'up'"
+      [class.stat-card__detail--down]="stat().trend === 'down'"
+    >
+      {{ stat().detail }}
+    </span>
+  </div>
+  <div class="stat-card__icon" aria-hidden="true">
+    <span class="material-symbols-outlined">{{ stat().icon }}</span>
+  </div>
+</article>

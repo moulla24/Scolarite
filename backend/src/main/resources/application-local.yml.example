@@ -1,0 +1,11 @@
+# Copier ce fichier vers application-local.yml (non versionné)
+#   copy application-local.yml.example application-local.yml
+#
+# Puis renseigner votre mot de passe PostgreSQL local.
+# Avec docker compose (backend/docker-compose.yml) le mot de passe est : postgres
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ecoli
+    username: postgres
+    password: postgres

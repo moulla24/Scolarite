@@ -1,0 +1,109 @@
+@if (needsClassSelection()) {
+  <div class="grades-table-hint">
+    <span class="material-symbols-outlined" aria-hidden="true">info</span>
+    Sélectionnez un <strong>niveau</strong>, puis une <strong>classe</strong> pour afficher les notes.
+  </div>
+} @else if (loadError()) {
+  <div class="grades-table-hint grades-table-hint--error">
+    <span class="material-symbols-outlined" aria-hidden="true">error</span>
+    Impossible de charger les notes. Redémarrez le backend puis réessayez.
+  </div>
+} @else if (summaryMode()) {
+  <div class="data-card">
+    <div class="data-card__wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Élève</th>
+            <th>Classe</th>
+            <th>Matières notées</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (summaryRows().length === 0) {
+            <tr>
+              <td colspan="4" class="data-table__empty">Aucun élève inscrit dans cette classe.</td>
+            </tr>
+          } @else {
+            @for (row of summaryRows(); track row.eleveId) {
+              <tr class="data-table__row">
+                <td class="cell-name-plain">{{ row.nomComplet }}</td>
+                <td><app-class-chip [label]="row.classe" /></td>
+                <td>
+                  <span class="grades-summary-count">{{ row.nombreMatieres }}</span>
+                  matière{{ row.nombreMatieres > 1 ? 's' : '' }}
+                </td>
+                <td>
+                  <button
+                    type="button"
+                    class="btn btn--outline btn--sm"
+                    (click)="viewBulletin.emit(row.eleveId)"
+                  >
+                    <span class="material-symbols-outlined" aria-hidden="true">description</span>
+                    Bulletin
+                  </button>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+} @else {
+  <div class="data-card">
+    <div class="data-card__wrap">
+      <table class="data-table grades-matrix">
+        <thead>
+          <tr>
+            <th class="grades-matrix__sticky">Élève</th>
+            <th>Classe</th>
+            @for (col of grille().colonnes; track col.evaluationId) {
+              <th class="grades-matrix__eval" [title]="col.matiere + ' — ' + col.type">
+                <span class="grades-matrix__eval-type">{{ col.type }}</span>
+                <span class="grades-matrix__eval-meta">{{ col.dateEvaluation }} /{{ col.noteMax }}</span>
+              </th>
+            }
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (grille().lignes.length === 0) {
+            <tr>
+              <td [attr.colspan]="grille().colonnes.length + 3" class="data-table__empty">
+                Aucun élève ou aucune évaluation pour cette matière.
+              </td>
+            </tr>
+          } @else {
+            @for (row of grille().lignes; track row.eleveId) {
+              <tr class="data-table__row">
+                <td class="cell-name-plain grades-matrix__sticky">{{ row.nomComplet }}</td>
+                <td><app-class-chip [label]="row.classe" /></td>
+                @for (note of row.notes; track $index) {
+                  <td class="grades-matrix__note">
+                    @if (note != null) {
+                      {{ note }}
+                    } @else {
+                      <span class="grades-matrix__empty-note">—</span>
+                    }
+                  </td>
+                }
+                <td>
+                  <button
+                    type="button"
+                    class="btn btn--outline btn--sm"
+                    (click)="viewBulletin.emit(row.eleveId)"
+                  >
+                    <span class="material-symbols-outlined" aria-hidden="true">description</span>
+                    Bulletin
+                  </button>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}

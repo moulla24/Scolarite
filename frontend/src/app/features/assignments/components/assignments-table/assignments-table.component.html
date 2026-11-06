@@ -1,0 +1,48 @@
+<div class="data-card">
+  <div class="data-card__wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Matière</th>
+          <th>Classe</th>
+          <th>Enseignant</th>
+          <th>Résumé</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (assignments().length === 0) {
+          <tr>
+            <td colspan="5" class="data-table__empty">
+              Aucune affectation trouvée. Créez un lien classe / matière / enseignant pour saisir des notes.
+            </td>
+          </tr>
+        } @else {
+          @for (a of assignments(); track a.id) {
+            <tr class="data-table__row">
+              <td>
+                <span class="assign-tag assign-tag--subject">{{ a.matiere }}</span>
+              </td>
+              <td>
+                <span class="assign-tag assign-tag--class">{{ a.classe }}</span>
+              </td>
+              <td>
+                <div class="assign-teacher">
+                  <span class="material-symbols-outlined assign-teacher__icon" aria-hidden="true">person</span>
+                  {{ a.enseignant }}
+                </div>
+              </td>
+              <td class="assign-summary">{{ a.libelle }}</td>
+              <td>
+                <app-row-actions-menu
+                  (edit)="edit.emit(a.id)"
+                  (delete)="deleteItem.emit(a.id)"
+                />
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

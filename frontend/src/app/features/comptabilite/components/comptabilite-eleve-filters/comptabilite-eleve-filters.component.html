@@ -1,0 +1,58 @@
+<div class="filter-field">
+  <label class="filter-field__label" for="cef-niveau">Niveau</label>
+  <select
+    id="cef-niveau"
+    class="filter-field__select"
+    [ngModel]="value().niveauId"
+    (ngModelChange)="onNiveauChange($event)"
+  >
+    <option value="">Tous les niveaux</option>
+    @for (n of niveaux(); track n.id) {
+      <option [value]="n.id">{{ n.nom }}</option>
+    }
+  </select>
+</div>
+<div class="filter-field">
+  <label class="filter-field__label" for="cef-classe">Classe</label>
+  <select
+    id="cef-classe"
+    class="filter-field__select"
+    [ngModel]="value().classeId"
+    (ngModelChange)="onClasseChange($event)"
+    [disabled]="!value().niveauId"
+  >
+    <option value="">Toutes les classes</option>
+    @for (c of classes(); track c.id) {
+      <option [value]="c.id">{{ c.nom }}</option>
+    }
+  </select>
+</div>
+<div class="filter-field filter-field--search">
+  <label class="filter-field__label" for="cef-search">Recherche élève</label>
+  <input
+    id="cef-search"
+    type="search"
+    class="filter-field__input"
+    placeholder="Nom, matricule…"
+    [ngModel]="value().eleveSearch"
+    (ngModelChange)="onEleveSearch($event)"
+  />
+</div>
+<div class="filter-field">
+  <label class="filter-field__label" for="cef-eleve">Élève</label>
+  <select
+    id="cef-eleve"
+    class="filter-field__select"
+    [ngModel]="value().eleveId"
+    (ngModelChange)="onEleveChange($event)"
+  >
+    @if (allowAllEleves()) {
+      <option value="">{{ elevePlaceholder() }}</option>
+    } @else {
+      <option value="" disabled>{{ elevePlaceholder() }}</option>
+    }
+    @for (e of filteredEleves(); track e.id) {
+      <option [value]="e.id">{{ e.nomComplet }} — {{ e.classe }}</option>
+    }
+  </select>
+</div>

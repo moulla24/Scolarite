@@ -1,0 +1,35 @@
+@if (classrooms().length === 0) {
+  <p class="classrooms-empty">Aucune classe trouvée.</p>
+} @else {
+  <div class="classrooms-grid">
+    @for (c of classrooms(); track c.id) {
+      <article class="class-card">
+        <div class="class-card__head">
+          <app-class-chip [label]="c.name" />
+          <span class="class-card__room">
+            <span class="material-symbols-outlined" aria-hidden="true">meeting_room</span>
+            {{ c.room }}
+          </span>
+        </div>
+        <p class="class-card__teacher">
+          <span class="material-symbols-outlined" aria-hidden="true">person</span>
+          {{ c.teacherName }}
+        </p>
+        <div class="class-card__occupancy">
+          <div class="class-card__bar">
+            <div
+              class="class-card__fill"
+              [style.width.%]="fillPercent(c)"
+              [class.class-card__fill--full]="fillPercent(c) >= 90"
+            ></div>
+          </div>
+          <span class="class-card__count">{{ c.studentCount }} / {{ c.capacity }} élèves</span>
+        </div>
+        <button type="button" class="btn btn--outline btn--sm class-card__btn" (click)="viewDetail.emit(c.id)">
+          <span class="material-symbols-outlined" aria-hidden="true">groups</span>
+          Voir les élèves
+        </button>
+      </article>
+    }
+  </div>
+}

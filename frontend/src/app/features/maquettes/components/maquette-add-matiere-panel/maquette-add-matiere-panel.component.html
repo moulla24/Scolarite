@@ -1,0 +1,83 @@
+<section class="add-panel">
+  <header class="add-panel__header">
+    <div>
+      <h3 class="add-panel__title">Ajouter une matière</h3>
+      <p class="add-panel__hint">Saisissez le nom, le volume horaire et les chapitres de la nouvelle matière.</p>
+    </div>
+    <button type="button" class="btn btn--ghost btn--sm" (click)="closed.emit()">
+      <span class="material-symbols-outlined" aria-hidden="true">close</span>
+      Fermer
+    </button>
+  </header>
+
+  <div class="add-panel__row">
+    <div class="add-panel__field add-panel__field--grow">
+      <label class="add-panel__label" for="mq-add-nom">Nom de la matière</label>
+      <input
+        id="mq-add-nom"
+        type="text"
+        class="add-panel__input"
+        placeholder="Ex. Philosophie"
+        [ngModel]="nom()"
+        (ngModelChange)="nom.set($event)"
+      />
+    </div>
+    <div class="add-panel__field">
+      <label class="add-panel__label" for="mq-add-vh">Volume horaire (h/sem)</label>
+      <input
+        id="mq-add-vh"
+        type="text"
+        class="add-panel__input"
+        inputmode="decimal"
+        [ngModel]="volumeHoraire()"
+        (ngModelChange)="volumeHoraire.set($event)"
+      />
+    </div>
+  </div>
+
+  <div class="add-panel__chapters">
+    <div class="add-panel__chapters-head">
+      <h4>Chapitres</h4>
+      <button type="button" class="btn btn--outline btn--sm" (click)="addChapitre()">
+        <span class="material-symbols-outlined" aria-hidden="true">add</span>
+        Ajouter
+      </button>
+    </div>
+
+    @for (ch of chapitres(); track $index; let i = $index) {
+      <div class="chapter-row">
+        <input
+          type="text"
+          class="chapter-row__ordre"
+          [ngModel]="ch.ordre"
+          (ngModelChange)="patchChapitre(i, 'ordre', $event)"
+          aria-label="Ordre chapitre"
+        />
+        <input
+          type="text"
+          class="chapter-row__titre"
+          placeholder="Titre du chapitre"
+          [ngModel]="ch.titre"
+          (ngModelChange)="patchChapitre(i, 'titre', $event)"
+        />
+        <input
+          type="text"
+          class="chapter-row__desc"
+          placeholder="Description (optionnel)"
+          [ngModel]="ch.description"
+          (ngModelChange)="patchChapitre(i, 'description', $event)"
+        />
+        <button type="button" class="chapter-row__remove" (click)="removeChapitre(i)" title="Supprimer">
+          <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+        </button>
+      </div>
+    }
+  </div>
+
+  <div class="add-panel__actions">
+    <button type="button" class="btn btn--primary" [disabled]="saving()" (click)="onSubmit()">
+      <span class="material-symbols-outlined" aria-hidden="true">add</span>
+      {{ saving() ? 'Ajout…' : 'Ajouter la matière' }}
+    </button>
+  </div>
+</section>

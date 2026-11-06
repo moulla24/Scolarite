@@ -1,0 +1,381 @@
+.stat-card {
+
+  display: flex;
+
+  align-items: flex-start;
+
+  justify-content: space-between;
+
+  gap: 1rem;
+
+  padding: 1.5rem;
+
+  border-radius: var(--radius-lg);
+
+  background: var(--surface-card);
+
+  border: 1px solid var(--border-subtle);
+
+  box-shadow: var(--shadow-card);
+
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+
+  position: relative;
+
+  overflow: hidden;
+
+
+
+  &::before {
+
+    content: '';
+
+    position: absolute;
+
+    top: 0;
+
+    left: 0;
+
+    right: 0;
+
+    height: 3px;
+
+    opacity: 0.55;
+
+    transition: opacity 0.2s ease;
+
+  }
+
+
+
+  &:hover {
+
+    transform: translateY(-2px);
+
+    box-shadow: var(--shadow-md);
+
+
+
+    &::before {
+
+      opacity: 1;
+
+    }
+
+  }
+
+}
+
+
+
+.stat-card__body {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 0.35rem;
+
+}
+
+
+
+.stat-card__title {
+
+  font-size: 0.8rem;
+
+  font-weight: 500;
+
+  color: var(--text-muted);
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.04em;
+
+}
+
+
+
+.stat-card__value {
+
+  font-size: 1.65rem;
+
+  font-weight: 700;
+
+  letter-spacing: -0.02em;
+
+  color: var(--text-primary);
+
+  line-height: 1.2;
+
+}
+
+
+
+.stat-card__detail {
+
+  font-size: 0.8rem;
+
+  color: var(--text-muted);
+
+
+
+  &--up {
+
+    color: var(--color-success);
+
+    font-weight: 600;
+
+  }
+
+
+
+  &--down {
+
+    color: var(--color-danger);
+
+    font-weight: 600;
+
+  }
+
+}
+
+
+
+.stat-card__icon {
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  width: 3rem;
+
+  height: 3rem;
+
+  border-radius: var(--radius-md);
+
+  flex-shrink: 0;
+
+
+
+  .material-symbols-outlined {
+
+    font-size: 1.5rem;
+
+  }
+
+}
+
+
+
+.stat-card[data-accent='primary'] {
+
+  &::before {
+
+    background: var(--gradient-primary);
+
+  }
+
+
+
+  .stat-card__icon {
+
+    background: var(--color-primary-bg);
+
+    color: var(--color-primary);
+
+  }
+
+
+
+  &:hover {
+
+    border-color: var(--color-primary-subtle);
+
+  }
+
+}
+
+
+
+.stat-card[data-accent='blue'] {
+
+  &::before {
+
+    background: linear-gradient(90deg, var(--color-accent-blue), var(--color-accent-sky));
+
+  }
+
+
+
+  .stat-card__icon {
+
+    background: var(--color-accent-blue-bg);
+
+    color: var(--color-accent-blue);
+
+  }
+
+
+
+  &:hover {
+
+    border-color: var(--color-accent-blue-border);
+
+  }
+
+}
+
+
+
+.stat-card[data-accent='violet'] {
+
+  &::before {
+
+    background: linear-gradient(90deg, var(--color-accent-violet), #a78bfa);
+
+  }
+
+
+
+  .stat-card__icon {
+
+    background: var(--color-accent-violet-bg);
+
+    color: var(--color-accent-violet);
+
+  }
+
+
+
+  &:hover {
+
+    border-color: #ddd6fe;
+
+  }
+
+}
+
+
+
+.stat-card[data-accent='teal'] {
+
+  &::before {
+
+    background: linear-gradient(90deg, var(--color-accent-teal), var(--color-accent-sky));
+
+  }
+
+
+
+  .stat-card__icon {
+
+    background: var(--color-accent-teal-bg);
+
+    color: var(--color-accent-teal-dark);
+
+  }
+
+
+
+  &:hover {
+
+    border-color: #99f6e4;
+
+  }
+
+}
+
+
+
+.stat-card[data-accent='danger'] {
+
+  &::before {
+
+    background: linear-gradient(90deg, var(--color-danger), var(--color-accent-rose));
+
+  }
+
+
+
+  .stat-card__icon {
+
+    background: var(--color-danger-bg);
+
+    color: var(--color-danger);
+
+  }
+
+
+
+  &:hover {
+
+    border-color: #fecaca;
+
+  }
+
+}
+
+
+
+.stat-card[data-accent='success'] {
+
+  &::before {
+
+    background: linear-gradient(90deg, var(--color-success), var(--color-accent-teal));
+
+  }
+
+
+
+  .stat-card__icon {
+
+    background: var(--color-success-bg);
+
+    color: var(--color-success);
+
+  }
+
+
+
+  &:hover {
+
+    border-color: #a7f3d0;
+
+  }
+
+}
+
+
+
+.stat-card[data-accent='warning'] {
+
+  &::before {
+
+    background: linear-gradient(90deg, var(--color-warning), var(--color-accent-amber));
+
+  }
+
+
+
+  .stat-card__icon {
+
+    background: var(--color-warning-bg);
+
+    color: var(--color-warning-dark);
+
+  }
+
+
+
+  &:hover {
+
+    border-color: #fde68a;
+
+  }
+
+}
+
+

@@ -1,0 +1,72 @@
+<app-page-header title="Rapports financiers" subtitle="Rapport journalier, mensuel ou annuel">
+  <div actions class="page-actions">
+    <button type="button" class="btn btn--primary" (click)="load()">Générer</button>
+  </div>
+</app-page-header>
+
+<div class="toolbar-row">
+  <div class="filter-field">
+    <label class="filter-field__label">Période</label>
+    <select class="filter-field__select" [ngModel]="type()" (ngModelChange)="type.set($event)">
+      <option value="JOURNALIER">Journalier</option>
+      <option value="MENSUEL">Mensuel</option>
+      <option value="ANNUEL">Annuel</option>
+    </select>
+  </div>
+</div>
+
+@if (loading()) {
+  <p>Génération…</p>
+}
+@if (!loading() && rapport(); as r) {
+  <section class="rapport-summary">
+    <p>Période : {{ r.periodeDebut | date: 'dd/MM/yyyy' }} — {{ r.periodeFin | date: 'dd/MM/yyyy' }}</p>
+    <div class="rapport-summary__grid">
+      <article><span>Encaissements</span><strong>{{ r.totalEncaissements | currencyMru }}</strong></article>
+      <article><span>Dépenses</span><strong>{{ r.totalDepenses | currencyMru }}</strong></article>
+      <article><span>Résultat net</span><strong>{{ r.resultatNet | currencyMru }}</strong></article>
+    </div>
+  </section>
+
+  <div class="data-card">
+    <h3>Paiements ({{ r.paiements.length }})</h3>
+    <div class="data-card__wrap">
+      <table class="data-table">
+        <thead>
+          <tr><th>Date</th><th>Élève</th><th>Reçu</th><th>Montant</th></tr>
+        </thead>
+        <tbody>
+          @for (p of r.paiements; track p.id) {
+            <tr>
+              <td>{{ p.datePaiement | date: 'dd/MM/yyyy' }}</td>
+              <td>{{ p.eleveNom }}</td>
+              <td>{{ p.numeroRecu ?? '—' }}</td>
+              <td>{{ p.montant | currencyMru }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="data-card">
+    <h3>Dépenses ({{ r.depenses.length }})</h3>
+    <div class="data-card__wrap">
+      <table class="data-table">
+        <thead>
+          <tr><th>Date</th><th>Catégorie</th><th>Description</th><th>Montant</th></tr>
+        </thead>
+        <tbody>
+          @for (d of r.depenses; track d.id) {
+            <tr>
+              <td>{{ d.dateDepense | date: 'dd/MM/yyyy' }}</td>
+              <td>{{ d.categorieLibelle }}</td>
+              <td>{{ d.description }}</td>
+              <td>{{ d.montant | currencyMru }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}

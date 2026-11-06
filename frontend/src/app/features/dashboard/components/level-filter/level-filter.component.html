@@ -1,0 +1,14 @@
+<div class="level-filter">
+  <span class="material-symbols-outlined level-filter__icon" aria-hidden="true">filter_list</span>
+  <label class="level-filter__label" for="level-select">Niveau :</label>
+  <select
+    id="level-select"
+    class="level-filter__select"
+    [ngModel]="selectedLevelId()"
+    (ngModelChange)="onLevelChange($event)"
+  >
+    @for (level of levels(); track level.id) {
+      <option [value]="level.id">{{ level.label }}</option>
+    }
+  </select>
+</div>
